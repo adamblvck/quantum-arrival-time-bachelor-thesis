@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "cra-template": "1.2.0",
+    "fft-js": "^0.0.12",
     "katex": "^0.16.18",
     "mathjs": "^14.0.1",
     "plotly.js-dist-min": "^2.35.3",

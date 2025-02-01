@@ -31,8 +31,8 @@ const Dashboard = () => {
   const animRef = useRef();
 
   // Grid settings
-  const xMin = -5, xMax = 5;
-  const yMin = -5, yMax = 5;
+  const xMin = -20, xMax = 20;
+  const yMin = -20, yMax = 20;
   const [numUnits, setNumUnits] = useState(50);
   const xValues = math.range(xMin, xMax, (xMax - xMin) / numUnits).toArray();
   const yValues = math.range(yMin, yMax, (yMax - yMin) / numUnits).toArray();
@@ -57,6 +57,10 @@ const Dashboard = () => {
 
   // New state for camera
   const [camera, setCamera] = useState({ eye: { x: 1.5, y: 1.5, z: 1.5 } });
+
+  // New state for surface style
+  const [surfaceStyle, setSurfaceStyle] = useState('surface'); // 'surface', 'wireframe', or 'none'
+  const [showMidpoints, setShowMidpoints] = useState(true);
 
   // ------------ 1. Parse and Compute f, fx, fy --------------
 
@@ -285,42 +289,52 @@ const Dashboard = () => {
     if (viewMode === 'surfaces') {
       // Show surfaces of f, fx, fy based on toggles
       const data = [];
-      data.push({
-        type: 'surface',
-        x: xValues,
-        y: yValues,
-        z: Zf,
-        name: 'f(x,y)',
-        colorscale: 'Viridis',
-        showscale: false
-      });
-      if (showFx) {
+      if (surfaceStyle !== 'none') {
         data.push({
           type: 'surface',
           x: xValues,
           y: yValues,
-          z: Zfx,
-          name: 'fx(x,y)',
-          colorscale: 'Hot',
-          showscale: false
+          z: Zf,
+          name: 'f(x,y)',
+          colorscale: 'Viridis',
+          showscale: false,
+          contours: surfaceStyle === 'wireframe' 
+            ? { x: { show: true }, y: { show: true }, z: { show: false } }
+            : {}
         });
+        if (showFx) {
+          data.push({
+            type: 'surface',
+            x: xValues,
+            y: yValues,
+            z: Zfx,
+            name: 'fx(x,y)',
+            colorscale: 'Hot',
+            showscale: false,
+            contours: surfaceStyle === 'wireframe' 
+              ? { x: { show: true }, y: { show: true }, z: { show: false } }
+              : {}
+          });
+        }
+        if (showFy) {
+          data.push({
+            type: 'surface',
+            x: xValues,
+            y: yValues,
+            z: Zfy,
+            name: 'fy(x,y)',
+            colorscale: 'Portland',
+            showscale: false,
+            contours: surfaceStyle === 'wireframe' 
+              ? { x: { show: true }, y: { show: true }, z: { show: false } }
+              : {}
+          });
+        }
       }
-      if (showFy) {
-        data.push({
-          type: 'surface',
-          x: xValues,
-          y: yValues,
-          z: Zfy,
-          name: 'fy(x,y)',
-          colorscale: 'Portland',
-          showscale: false
-        });
+      if (showMidpoints) {
+        const midpointTrace = computeClosestMidpoints(f, fx, fy);
+        data.push(midpointTrace);
       }
-
-      // Add midpoint trace to the surfaces view
-      const midpointTrace = computeClosestMidpoints(f, fx, fy);
-      data.push(midpointTrace);
-
       setPlotData(data);
 
     } else if (viewMode === 'contour') {
@@ -340,21 +354,25 @@ const Dashboard = () => {
     } else if (viewMode === 'normals') {
       // Third chart: A surface of the normal distance
       const Za = computeNormalsDistance(f, fx, fy);
-      const normalSurface = {
-        type: 'surface',
-        x: xValues,
-        y: yValues,
-        z: Za,
-        name: 'Distance Between Normals',
-        colorscale: 'Viridis',
-        showscale: true
-      };
-
-      // **Fourth chart**: A scatter3d trace for the closest midpoints
-      const midpointTrace = computeClosestMidpoints(f, fx, fy);
-
-      // Combine them in one Plotly figure with 2 traces
-      const data = [normalSurface, midpointTrace];
+      const data = [];
+      if (surfaceStyle !== 'none') {
+        data.push({
+          type: 'surface',
+          x: xValues,
+          y: yValues,
+          z: Za,
+          name: 'Distance Between Normals',
+          colorscale: 'Viridis',
+          showscale: true,
+          contours: surfaceStyle === 'wireframe'
+            ? { x: { show: true }, y: { show: true }, z: { show: false } }
+            : {}
+        });
+      }
+      if (showMidpoints) {
+        const midpointTrace = computeClosestMidpoints(f, fx, fy);
+        data.push(midpointTrace);
+      }
       setPlotData(data);
     }
   };
@@ -596,6 +614,53 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        <div className="mt-4">
+          <h4 className="font-semibold mb-2">Surface Render Type:</h4>
+          <label className="block mb-1">
+            <input
+              type="radio"
+              name="surfaceStyle"
+              value="surface"
+              checked={surfaceStyle === 'surface'}
+              onChange={() => setSurfaceStyle('surface')}
+              className="mr-2"
+            />
+            Surface
+          </label>
+          <label className="block mb-1">
+            <input
+              type="radio"
+              name="surfaceStyle"
+              value="wireframe"
+              checked={surfaceStyle === 'wireframe'}
+              onChange={() => setSurfaceStyle('wireframe')}
+              className="mr-2"
+            />
+            Wireframe
+          </label>
+          <label className="block">
+            <input
+              type="radio"
+              name="surfaceStyle"
+              value="none"
+              checked={surfaceStyle === 'none'}
+              onChange={() => setSurfaceStyle('none')}
+              className="mr-2"
+            />
+            None
+          </label>
+        </div>
+
+        <div className="mt-4 flex items-center">
+          <input
+            type="checkbox"
+            checked={showMidpoints}
+            onChange={() => setShowMidpoints(!showMidpoints)}
+            className="mr-2"
+          />
+          <label className="font-semibold">Show Midpoints</label>
+        </div>
       </div>
       
       {/* Middle column: main display */}
