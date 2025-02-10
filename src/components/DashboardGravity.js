@@ -14,8 +14,7 @@ import { explanations, InfoButton } from './explanations';
 const InfoModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
-  const markdown = `
-# Quantum Simulation Info
+  const markdown = `# Quantum Simulation Info
 
 This dashboard simulates the time evolution of a wavefunction $\\psi(z,t)$ under a 1D potential 
 using the split-operator method. The Hamiltonian of the system is:
@@ -37,7 +36,15 @@ $$
 \\psi(z,0) = \\frac{1}{(2\\pi\\sigma_0^2)^{1/4}}\\exp\\left(-\\frac{(z-z_0)^2}{4\\sigma_0^2} + \\frac{ip_0z}{\\hbar}\\right)
 $$
 
-When using superposition, we add two such wave packets with different parameters.
+This simulation uses the [Split-Operator Method](https://www.algorithm-archive.org/contents/split-operator_method/split-operator_method.html) to evolve the wavefunction in time. $|\\psi|^2$ is plotted as a heatmap and in 1D for visual inspection.
+Since the Split-Operator Method assumes periodic boundary conditions, we apply exponential decay at about 10\% of the boundaries, to avoid unwanted reflections.
+
+## Running The Simulation
+
+Choose a potential parameter, initial conditions, and simulation parameters. After this click on the green "Run Simulation" button.
+Simulations can be stored (locally in browser, including simulation data) in the left sidebar.
+
+For more information about each graph, click on the info button next to each graph.
   `;
 
   return (
@@ -48,6 +55,14 @@ When using superposition, we add two such wave packets with different parameters
             remarkPlugins={[remarkMath]}
             rehypePlugins={[rehypeKatex]}
             className="space-y-4 text-gray-700"
+            components={{
+              h1: ({node, ...props}) => <h1 className="text-3xl font-bold my-4" {...props} />,
+              h2: ({node, ...props}) => <h2 className="text-2xl font-bold my-3" {...props} />,
+              h3: ({node, ...props}) => <h3 className="text-xl font-bold my-2" {...props} />,
+              h4: ({node, ...props}) => <h4 className="text-lg font-bold my-2" {...props} />,
+              p: ({node, ...props}) => <p className="my-2" {...props} />,
+              a: ({node, ...props}) => <a className="text-blue-500 hover:text-blue-600" {...props} />
+            }}
           >
             {markdown}
           </ReactMarkdown>
@@ -74,6 +89,14 @@ const ExplanationModal = ({ isOpen, onClose, content }) => {
             remarkPlugins={[remarkMath]}
             rehypePlugins={[rehypeKatex]}
             className="space-y-4 text-gray-700"
+            components={{
+              h1: ({node, ...props}) => <h1 className="text-3xl font-bold my-4" {...props} />,
+              h2: ({node, ...props}) => <h2 className="text-2xl font-bold my-3" {...props} />,
+              h3: ({node, ...props}) => <h3 className="text-xl font-bold my-2" {...props} />,
+              h4: ({node, ...props}) => <h4 className="text-lg font-bold my-2" {...props} />,
+              p: ({node, ...props}) => <p className="my-2" {...props} />,
+              a: ({node, ...props}) => <a className="text-blue-500 hover:text-blue-600" {...props} />
+            }}
           >
             {content}
           </ReactMarkdown>
@@ -187,6 +210,10 @@ const Dashboard = () => {
 
   // Add new state for explanation modals
   const [activeExplanation, setActiveExplanation] = useState(null);
+
+  // Add these new state variables near the top with other states
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   /**
    * ---------------------------------------
@@ -440,16 +467,31 @@ const Dashboard = () => {
    * 6) Handling the "Run Simulation" button
    * -------------------------------------------
    */
-  const handleRunSimulation = () => {
-    const { zArr, tArr, probArr, currentArr } = simulateN();
-    setZArray(zArr);
-    setTArray(tArr);
-    setProbArr(probArr);
-    setCurrentArr(currentArr);
-    setTIndex(0);
-    // Compute particle trajectories using the current simulation results and the selected finesse.
-    const trajs = computeTrajectories(probArr, currentArr, zArr, tArr, particleSpawnCenter, particleSpawnWidth, numParticles, trajFinesse, trajIntegrationFactor);
-    setTrajectories(trajs);
+  const handleRunSimulation = async () => {
+    setIsSimulating(true);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    try {
+      const { zArr, tArr, probArr, currentArr } = simulateN();
+      
+      setZArray(zArr);
+      setTArray(tArr);
+      setProbArr(probArr);
+      setCurrentArr(currentArr);
+      setTIndex(0);
+      
+      const trajs = computeTrajectories(probArr, currentArr, zArr, tArr, particleSpawnCenter, particleSpawnWidth, numParticles, trajFinesse, trajIntegrationFactor);
+      setTrajectories(trajs);
+
+      // Small delay before hiding the loading state
+      setTimeout(() => {
+        setIsSimulating(false);
+      }, 500);
+
+    } catch (error) {
+      console.error('Simulation failed:', error);
+      setIsSimulating(false);
+    }
   };
 
   /**
@@ -788,26 +830,27 @@ const interpolateVelocity = (pos, zArr, currentRow, probRow) => {
         <div className="w-1/5 min-w-[300px] border-r border-gray-300 p-4 overflow-y-auto">
           <div className="space-y-6">
             <div>
-              <h1 classNamez="text-2xl font-bold mb-2">Quantum Simulator</h1>
-              <p className="text-gray-600 text-sm mb-4">
+              <h1 className="text-2xl font-bold mb-2">Quantum Simulator</h1>
+              <p className="text-gray-600 text-sm mb-2">
                 Simulate quantum wave packet dynamics, falling under gravity past a barrier.
-              </p>
-              <p className="text-gray-600 text-sm mb-4">
-                Author: Adam 'Blvck' Blazejczak<br/>
-                Promotor: Ward Wuyts<br/>
-                Co-Promotor: Jef Hooyberghs<br/>
-                Date: 2025-02-10
               </p>
               <button 
                 onClick={() => setIsModalOpen(true)} 
-                className="text-blue-500 hover:text-blue-600 text-sm"
+                className="text-blue-500 hover:text-blue-600 text-sm pb-2jo mb-2"
               >
                 Learn more
               </button>
+              <p className="border-t pt-2 text-gray-600 text-sm mb-4">
+                Author: Adam 'Blvck' Blazejczak<br/>
+                Promotor: Ward Struyve<br/>
+                Co-Promotor: Jef Hooyberghs<br/>
+                Date: 2025-02-10
+              </p>
+              
             </div>
             {/* Potential Controls */}
             <div>
-              <h2 className="text-xl font-bold mb-2">Potential</h2>
+              <h2 className="text-xl font-bold mb-2 border-t pt-2">Potential</h2>
               <label className="block mb-2">
                 <span className="font-semibold">Type:</span>
                 <select 
@@ -1046,6 +1089,21 @@ const interpolateVelocity = (pos, zArr, currentRow, probRow) => {
                 </div>
               </details>
             </div>
+
+            {/* Sticky footer */}
+            <div className="fixed bottom-4 left-4 flex flex-row items-center gap-8 w-80">
+              <img 
+                src="./assets/uhasselt-liggend.png" 
+                alt="UHasselt Logo" 
+                className="w-1/3 object-contain"
+              />
+              <img 
+                src="./assets/KU_Leuven_logo.png" 
+                alt="KU Leuven Logo" 
+                className="w-1/3 object-contain"
+              />
+            </div>
+
           </div>
         </div>
         {/* Center Content */}
@@ -1072,7 +1130,7 @@ const interpolateVelocity = (pos, zArr, currentRow, probRow) => {
             </div>
             <div className="flex-1 mt-4">
               <div className="flex items-center mb-2">
-                <h3 className="text-lg font-semibold">Probability Density in 2D</h3>
+                <h3 className="text-lg font-semibold">Probability Density in 1D</h3>
                 <InfoButton onClick={() => setActiveExplanation('probabilityCurrent')} />
               </div>
               <Plot
@@ -1175,6 +1233,7 @@ const interpolateVelocity = (pos, zArr, currentRow, probRow) => {
                   value={xMin}
                   onChange={(e) => setXMin(parseFloat(e.target.value))}
                   className="ml-2 border p-1 rounded w-16"
+                  step="any"
                 />
               </label>
               <label className="block">
@@ -1279,15 +1338,32 @@ const interpolateVelocity = (pos, zArr, currentRow, probRow) => {
                 />
               </label>
             </div>
-            <button 
-              onClick={handleRunSimulation}
-              className="bg-green-500 text-white px-3 py-1 rounded"
-            >
-              Run Simulation
-            </button>
+            <div className="space-y-2">
+              <button 
+                onClick={handleRunSimulation}
+                className={`w-full px-3 py-2 rounded font-medium transition-colors ${
+                  isSimulating 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
+                } text-white`}
+                disabled={isSimulating}
+              >
+                {isSimulating ? 'Simulating...' : 'Run Simulation'}
+              </button>
+
+              {/* Simple loading indicator */}
+              <div className={`transition-all duration-300 ${
+                isSimulating ? 'opacity-100 h-8' : 'opacity-0 h-0'
+              }`}>
+                <div className="text-sm text-gray-600 text-center">
+                  Computing quantum dynamics...
+                </div>
+              </div>
+            </div>
             <div className="mt-4">
-              <h3 className="font-semibold">Time Index:</h3>
+              <h3 className="border-t pt-2 font-semibold">Time Slider</h3>
               <input 
+                className="w-full"
                 type="range"
                 min="0"
                 max={(probArr.length - 1) || 0}

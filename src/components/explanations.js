@@ -36,27 +36,17 @@ This ensures that the particle is found somewhere in space with certainty.
   `,
 
   probabilityCurrent: `
-# Probability Current
+# Probability Density in 1D
 
-The probability current $j(z,t)$ describes the flow of probability in the quantum system. It is calculated as:
+Similar to the heatmap, this plot shows the probability density $|\\psi(z,t)|^2$ as a function of position $z$ and time $t$.
 
-$$
-j(z,t) = \\frac{\\hbar}{m}\\,\\text{Im}\\left(\\psi^*(z,t)\\,\\frac{\\partial \\psi(z,t)}{\\partial z}\\right)
-$$
+Using the slider in the right panel, one can progress the wavefunction in time.
 
-### Physical Significance
-
-- **Flow of Probability:** A positive $j(z,t)$ indicates that probability is flowing in the positive $z$-direction, while a negative value indicates flow in the opposite direction.
-- **Conservation of Probability:** Together with the continuity equation
-
-$$
-\\frac{\\partial |\\psi(z,t)|^2}{\\partial t} + \\frac{\\partial j(z,t)}{\\partial z} = 0,
-$$
-
-the probability current guarantees that probability is conserved.
+Probability distribution in regions $x < 0$ and $x\\ge 0$ are calculated for analysing the transmission and reflection of the wavepacket, respectively (see right panel).
+However, since we're using Split-Operator Method for the numerical simulaiton, the probability distribution is not conserved over time, as the transmitted part gets absorbed eventually..
 
 **References:**
-- Bohm, D. *A Suggested Interpretation of the Quantum Theory in Terms of "Hidden" Variables* (1952).
+- ...
   `,
 
   bohmianTrajectories: `
@@ -82,79 +72,46 @@ $$
 
 This approach yields a deterministic trajectory for each particle, complementing the probabilistic nature of the wavefunction.
 
+The Bohmian trajectories can be disabled in the right panel.
+
 **References:**
 - Bohm, D. *A Suggested Interpretation of the Quantum Theory in Terms of "Hidden" Variables* (1952).  
-- Holland, P.R. *The Quantum Theory of Motion* (1993).
   `,
 
   potentialEnergy: `
-# Potential Energy Configuration
+# Analytical Arrival Time Distribution
 
-The simulation models the total potential energy $V(z)$ as a combination of a barrier potential and the gravitational potential.
+This plot shows the analytical arrival time distribution for a particle tunneling through a thin potential barrier in free fall, represented by the probability current $j(z,t)$ at the detector position $-L$ as a function of time $t$:
 
-### Total Potential
+The parameters for the analytical solution don't correspond with simulation parameters yet!
 
-$$
-V(z) = V_{barrier}(z) + mgz
-$$
-
-### Barrier Types
-
-- **Delta Barrier:**
+The arrival time distribution per unit area is calculated as:
 
 $$
-V_{\\delta}(z) = \\alpha\\,\\delta(z-z_0)
+\\Pi_{\\gamma}(\\tau) = -J_{z}(-L, \\tau) \\approx \\frac{2\\tau \\left| \\hat{\\psi}(L + \\tau^{2}) \\right|^{2}}{1 + (2\\pi\\gamma)^{2} \\operatorname{Ai}^{4}(-L - \\tau^{2})}.
 $$
 
-- **Gaussian Barrier:**
+Making the arrival-time density per unit area:
 
 $$
-V_G(z) = V_0\\,\\exp\\left(-\\frac{(z-z_0)^2}{2\\sigma^2}\\right)
+\\Pi_{\\gamma}(\\tau) \\approx \\frac{\\Pi_{0}(\\tau)}{1 + \\left[ 2\\pi\\gamma \\operatorname{Ai}^{2}(-L - \\tau^{2}) \\right]^{2}}
 $$
-
-- **Double Gaussian:**  
-The sum of two Gaussian potentials, each with its own parameters.
-
-This combined potential governs the evolution of the wavefunction according to the Schrödinger equation.
 
 **References:**
-- Razavy, M. *Quantum Theory of Tunneling* (2003).
-  `,
+- Siddhant Das, *Tunneling through a thin potential barrier in free fall* (2022).
+`,
 
   arrivalTimeDistribution: `
-# Arrival Time Distribution
+# Simulated Arrival Time Distribution at $-L$
 
-The arrival time distribution $\\Pi(\\tau)$ can be characterizes the probability that a particle reaches a detector located at $z = -L$ at time $\\tau$ (Siddhant Das paper (2022).
+This plot shows the simulated arrival time distribution at the detector position $-L$ as a function of time $t$.
 
-### Definition
+We essentially simulate the evolution of the wavefunction, graphing the probability current $j(-L,t)$ for an adequate range of time.
 
-Following the Siddhant Das paper (2022), It is defined as the probability current at some detector location $-L$:
-
-$$
-\\Pi(\\tau) \\equiv j(-L, \\tau)
-$$
-
-### Asymptotic Approximation
-
-For a system with a delta barrier and gravity, an asymptotic expression is given by:
-
-$$
-\\Pi_{\\gamma}(\\tau) \\approx \\frac{2\\tau \\left[\\mathrm{Ai}\\bigl( -(L+\\tau^2) \\bigr)\\right]^2}{1 + \\left[2\\tau \\gamma\\,\\mathrm{Ai}'\\bigl( -(L+\\tau^2) \\bigr)\\right]^2}
-$$
-
-where:
-- $\\mathrm{Ai}$ is the Airy function,
-- $\\mathrm{Ai}'$ is its derivative,
-- $\\gamma$ represents the strength of the delta barrier, and
-- $L$ is the distance from the barrier to the detector.
-
-### Physical Interpretation
-
-- **Multiple Peaks:** The interaction of the wave packet with the barrier leads to both transmitted and reflected components, resulting in multiple peaks in the arrival time distribution.
-- **Airy Oscillations:** The gravitational potential introduces characteristic oscillations (Airy oscillations) into the arrival profile.
+For now, there's a discrepancy between the analytical and simulated distributions, which we are working on.
 
 **References:**
-- Muga, J.G., Sala Mayato, R., Egusquiza, I.L. (Eds.), *Time in Quantum Mechanics* (2008).
+- ...
   `,
 
   simulationParameters: `
