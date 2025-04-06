@@ -1,5 +1,5 @@
 import { deltaBarrier, gaussianBarrier, initialWavefunction, gravityPotential, squareWellPotential } from './potentialHelpers';
-import { applyPotentialHalfStep, applyKineticFullStep, applyAbsorbingMask, applyCosineMask } from './splitOperatorHelpers';
+import { applyPotentialHalfStep, applyKineticFullStep, applyAbsorbingMask, applyCosineMask, applyCAP } from './splitOperatorHelpers';
 import { fft, ifft } from 'fft-js';
 
 export const simulateN = ({
@@ -150,7 +150,8 @@ export const simulateN = ({
     applyPotentialHalfStep(psiRe, psiIm, barrierArr, dtOver2hbar);
 
     // Apply absorbing mask and capture separate losses
-    const { stepLossLeft, stepLossRight } = applyAbsorbingMask(psiRe, psiIm, zArr, { simXMin, simXMax });
+    // const { stepLossLeft, stepLossRight } = applyAbsorbingMask(psiRe, psiIm, zArr, { simXMin, simXMax });
+    const { capLossLeft: stepLossLeft, capLossRight: stepLossRight } = applyCAP(psiRe, psiIm, zArr, { xMin, xMax, dt, hbar, W0: 1.0 });
     // const { stepLossLeft, stepLossRight } = applyCosineMask(psiRe, psiIm, zArr, { xMin, xMax });
     
     lossArrLeft[step] = stepLossLeft;

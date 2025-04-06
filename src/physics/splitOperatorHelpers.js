@@ -57,9 +57,9 @@ export const applyAbsorbingMask = (psiRe, psiIm, zArr, { xMin, xMax }) => {
 	}
 	
 	return { stepLossLeft, stepLossRight };
-  };
+};
 
-  export const applyCosineMask = (psiRe, psiIm, xArr, { xMin, xMax }) => {
+export const applyCosineMask = (psiRe, psiIm, xArr, { xMin, xMax }) => {
 	const domainWidth = xMax - xMin;
 	const taperWidth = 0.25 * domainWidth; // 5% taper on each side
 	const leftStart = xMin;
@@ -97,8 +97,48 @@ export const applyAbsorbingMask = (psiRe, psiIm, zArr, { xMin, xMax }) => {
 	}
   
 	return { lossLeft, lossRight };
-  };
+};
+
+export const applyCAP = (psiRe, psiIm, zArr, { xMin, xMax, dt, hbar, W0 = 1.0 }) => {
+	// Define a margin where the CAP will smoothly turn on (25% of the physical region)
+	const margin = 0.25 * (xMax - xMin);
+	let capLossLeft = 0;
+	let capLossRight = 0;
   
+	// Loop over all grid points
+	for (let i = 0; i < psiRe.length; i++) {
+	  let W = 0; // default: no absorption in the central region
+	  // If we are to the left of the absorbing region, define a quadratic absorption profile
+	  if (zArr[i] < xMin - margin) {
+		const d = (xMin - margin) - zArr[i];
+		W = W0 * Math.pow(d / (margin / 2), 2);
+	  }
+	  // Similarly for points to the right of the absorbing region
+	  else if (zArr[i] > xMax + margin) {
+		const d = zArr[i] - (xMax + margin);
+		W = W0 * Math.pow(d / (margin / 2), 2);
+	  }
+	  // Calculate the CAP evolution factor exp(-W dt/ħ)
+	  const factor = Math.exp(-W * dt / hbar);
+  
+	  // For bookkeeping, compute the local probability loss
+	  const origProb = psiRe[i] * psiRe[i] + psiIm[i] * psiIm[i];
+	  const newProb = factor * factor * origProb;
+	  const localLoss = origProb - newProb;
+  
+	  if (zArr[i] < 0) {
+		capLossLeft += localLoss;
+	  } else {
+		capLossRight += localLoss;
+	  }
+  
+	  // Apply the CAP factor to both real and imaginary parts
+	  psiRe[i] *= factor;
+	  psiIm[i] *= factor;
+	}
+  
+	return { capLossLeft, capLossRight };
+};
 
 
   
