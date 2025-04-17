@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+**__pycache__**
+*.mp4
+*.pkl
+/notebooks/venv/*

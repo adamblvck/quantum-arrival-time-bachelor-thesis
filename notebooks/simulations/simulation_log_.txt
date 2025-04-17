@@ -1,0 +1,307 @@
+
+=== Simulation Run: 2025-03-24 22:29:10 ===
+Video file: simulations/20250324_22-28_quantum_evolution.mp4
+Parameters:
+    x_min: -20
+    x_max: 20
+    Nx: 128
+    y_min: -20
+    y_max: 20
+    Ny: 128
+    n_steps: 2000
+    dt: 0.01
+    barrier_center_y: 0
+    barrier_strength: 8
+    barrier_width: 1
+    x0: 0
+    y0: 15
+    p0x: 0
+    p0y: 0.0
+=== Simulation Run: 2025-03-24 22:51:39 ===
+Video file: simulations/20250324_22-50_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -20
+    x_max: 20
+    Nx: 64
+    y_min: -20
+    y_max: 20
+    Ny: 64
+    n_steps: 2000
+    dt: 0.01
+    barrier_center_x: 0
+    barrier_strength: 10
+    barrier_width: 1
+    x0: 0
+    y0: 15
+    p0x: 0
+    p0y: 0.0
+=== Simulation Run: 2025-03-24 22:56:03 ===
+Video file: simulations/20250324_22-51_quantum_evolution.mp4
+Parameters:
+    x_min: -20
+    x_max: 20
+    Nx: 512
+    y_min: -20
+    y_max: 20
+    Ny: 512
+    n_steps: 2000
+    dt: 0.01
+    barrier_center_y: 0
+    barrier_strength: 10
+    barrier_width: 1
+    x0: 0
+    y0: 15
+    p0x: 0
+    p0y: 0.0
+=== Simulation Run: 2025-03-24 22:57:23 ===
+Video file: simulations/20250324_22-56_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -20
+    x_max: 20
+    Nx: 64
+    y_min: -20
+    y_max: 20
+    Ny: 64
+    n_steps: 2000
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 10
+    barrier_width: 1
+    x0: 0
+    y0: 15
+    p0x: 0
+    p0y: 0.0
+=== Simulation Run: 2025-03-24 23:55:11 ===
+Video file: simulations/20250324_23-54_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -20
+    x_max: 20
+    Nx: 512
+    y_min: -20
+    y_max: 20
+    Ny: 512
+    n_steps: 300
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 01:21:38 ===
+Video file: simulations/20250325_01-16_quantum_evolution.mp4
+Parameters:
+    x_min: -20
+    x_max: 20
+    Nx: 512
+    y_min: -20
+    y_max: 20
+    Ny: 512
+    n_steps: 2000
+    dt: 0.01
+    barrier_center_y: 0
+    barrier_strength: 10
+    barrier_width: 1
+    x0: 0
+    y0: 15
+    p0x: 0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 01:28:08 ===
+Video file: simulations/20250325_01-27_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -20
+    x_max: 20
+    Nx: 512
+    y_min: -20
+    y_max: 20
+    Ny: 512
+    n_steps: 300
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 01:40:39 ===
+Video file: simulations/20250325_01-40_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 300
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 01:46:46 ===
+Video file: simulations/20250325_01-46_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 300
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 01:51:49 ===
+Video file: simulations/20250325_01-50_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 600
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 01:56:32 ===
+Video file: simulations/20250325_01-55_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 600
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 02:09:40 ===
+Video file: simulations/20250325_02-08_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 600
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 02:22:12 ===
+Video file: simulations/20250325_02-20_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 600
+    dt: 0.01
+    barrier_center_y: -5
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 02:26:10 ===
+Video file: simulations/20250325_02-24_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 600
+    dt: 0.01
+    barrier_center_y: 0
+    barrier_strength: 200
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 02:33:18 ===
+Video file: simulations/20250325_02-32_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 600
+    dt: 0.01
+    barrier_center_y: 0
+    barrier_strength: 30
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 02:35:55 ===
+Video file: simulations/20250325_02-34_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 512
+    y_min: -40
+    y_max: 40
+    Ny: 512
+    n_steps: 600
+    dt: 0.01
+    barrier_center_y: 0
+    barrier_strength: 10
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0
+=== Simulation Run: 2025-03-25 02:45:37 ===
+Video file: simulations/20250325_02-40_quantum_evolution_DEBUG.mp4
+Parameters:
+    x_min: -40
+    x_max: 40
+    Nx: 1024
+    y_min: -40
+    y_max: 40
+    Ny: 1024
+    n_steps: 600
+    dt: 0.01
+    barrier_center_y: 0
+    barrier_strength: 8
+    barrier_width: 1
+    x0: 5
+    y0: 15
+    p0x: 0.0
+    p0y: 0.0

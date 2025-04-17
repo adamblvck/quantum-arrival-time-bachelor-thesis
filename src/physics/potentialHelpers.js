@@ -10,7 +10,7 @@ export const gravityPotential = (z) => m * g * z;
 export const deltaBarrier = (z, z0, alpha, dz) => {
    const sigma = dz / 2;
    return alpha * Math.exp( -((z - z0) ** 2) / (2 * sigma ** 2) ) / (Math.sqrt(2 * Math.PI) * sigma);
- };
+};
 
 export const gaussianBarrier = (z, z0, V0, sigma) => {
    return V0 * Math.exp( -((z - z0) ** 2) / (2 * sigma ** 2) );
