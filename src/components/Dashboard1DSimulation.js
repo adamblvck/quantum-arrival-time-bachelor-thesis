@@ -153,15 +153,15 @@ const Dashboard = () => {
    * -------------------------------
    */
   // Available potential types: 'delta', 'gaussian', 'doubleGaussian', 'squareWell'
-  const [barrierType, setBarrierType] = useState('delta'); 
+  const [barrierType, setBarrierType] = useState('gaussian'); 
   
   // Delta-barrier parameters
   const [deltaAlpha, setDeltaAlpha] = useState(15.0); // strength of the barrier - gamme in Siddhant Das Paper
   const [deltaZ0, setDeltaZ0] = useState(0.0);
 
   // Gaussian-barrier parameters (for single Gaussian)
-  const [gaussV0, setGaussV0] = useState(5.0);
-  const [gaussSigma, setGaussSigma] = useState(0.5);
+  const [gaussV0, setGaussV0] = useState(12.0);
+  const [gaussSigma, setGaussSigma] = useState(1);
   const [gaussZ0, setGaussZ0] = useState(0.0);
 
   // NEW: Parameters for the second Gaussian (for doubleGaussian potential)
@@ -181,14 +181,14 @@ const Dashboard = () => {
   const [sigmaPacket2, setSigmaPacket2] = useState(1.0);
 
   // PDE solver parameters (xMin/xMax are the plotting limits)
-  const [xMin, setXMin] = useState(-20);
+  const [xMin, setXMin] = useState(-10);
   const [xMax, setXMax] = useState(20);
   const [Nx, setNx] = useState(512);
-  const [nSteps, setNSteps] = useState(1000);
+  const [nSteps, setNSteps] = useState(5000);
   const [dt, setDt] = useState(0.01);
 
   // Detector parameter L (the detector is at z = –L, L > 0)
-  const [detectorL, setDetectorL] = useState(1.0);
+  const [detectorL, setDetectorL] = useState(5.0);
 
   // New state for storing simulation results:
   const [zArray, setZArray] = useState([]);       // simulation grid
@@ -366,12 +366,15 @@ const Dashboard = () => {
           return (prev + 1) % probArr.length;
         });
       };
-      animationRef.current = setInterval(animate, 100);
+      // Convert dt to milliseconds for the interval
+      // dt is in seconds, so multiply by 1000 to get milliseconds
+      const intervalTime = dt * 1000;
+      animationRef.current = setInterval(animate, intervalTime);
       return () => clearInterval(animationRef.current);
     } else {
       clearInterval(animationRef.current);
     }
-  }, [isPlaying, probArr]);
+  }, [isPlaying, probArr, dt]); // Add dt to dependencies
 
   /**
    * ----------------------------------
@@ -821,8 +824,8 @@ const Dashboard = () => {
                   height: 400,
                   autosize: true,
                   margin: { t: 30, l: 50, r: 10, b: 40 },
-                  xaxis: { title: 'z' },
-                  yaxis: { title: 'time' },
+                  xaxis: { title: 'time (s)' },
+                  yaxis: { title: 'z', range: [xMin, xMax] },
                 }}
                 useResizeHandler
                 style={{ width: '100%', height: '400px' }}
@@ -867,15 +870,15 @@ const Dashboard = () => {
                   height: 400,
                   autosize: true,
                   margin: { t: 50, l: 50, r: 50, b: 40 },
-                  xaxis: { title: 'z' },
-                  yaxis: { title: 'time' },
+                  xaxis: { title: 'time (s)'},
+                  yaxis: { title: 'z', range: [xMin, xMax] },
                   showlegend: true,
                 }}
                 useResizeHandler
                 style={{ width: '100%', height: '400px' }}
               />
             </div>
-            <div className="flex-1 mt-4">
+            {/* <div className="flex-1 mt-4">
               <div className="flex items-center mb-2">
                 <h3 className="text-lg font-semibold">Time of Arrival From Paper</h3>
                 <InfoButton onClick={() => setActiveExplanation('potentialEnergy')} />
@@ -895,7 +898,7 @@ const Dashboard = () => {
                 useResizeHandler
                 style={{ width: '100%', height: '300px' }}
               />
-            </div>
+            </div> */}
             <div className="flex-1 mt-4">
 
               <div className="flex items-center mb-2">

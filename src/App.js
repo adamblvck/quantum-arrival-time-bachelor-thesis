@@ -9,7 +9,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100 relative">
       {/* Floating dropdown positioned at top-right */}
-      <div className="absolute top-4 right-4">
+      {/* <div className="absolute top-4 right-4">
         <select
           className="bg-white px-4 py-2 rounded-lg shadow-md border border-gray-200 cursor-pointer hover:border-gray-300 transition-colors"
           value={selectedDashboard}
@@ -21,12 +21,12 @@ function App() {
           <option value="gravity">Tunneling Time - 2D Spin-1/2 Sim</option>
           <option value="transmission">Transmission Test Dashboard</option>
         </select>
-      </div>
+      </div> */}
 
       {/* Conditional rendering of dashboards */}
-      {selectedDashboard === '1dSim' && <Dashboard1DSimulation />}
-      {selectedDashboard === '2dSim' && <Dashboard2DSimulation />}
-      {selectedDashboard === 'transmission' && <DashboardTransmissionTest />}
+      <Dashboard1DSimulation />
+      {/* {selectedDashboard === '2dSim' && <Dashboard2DSimulation />} */}
+      {/* {selectedDashboard === 'transmission' && <DashboardTransmissionTest />} */}
     </div>
   );
 }

@@ -28,10 +28,15 @@ export const interpolateVelocity = (pos, zArr, currentRow, probRow) => {
 export const generateHeatmapData = (probArr, zArray, tArray) => {
   if (!probArr || probArr.length === 0) return [];
   
+  // Create a transposed version of probArr
+  const transposedProbArr = probArr[0].map((_, colIndex) => 
+    probArr.map(row => row[colIndex])
+  );
+
   return [{
-    z: probArr,
-    x: zArray,
-    y: tArray,
+    z: transposedProbArr,
+    x: tArray,        // Swapped with y
+    y: zArray,        // Swapped with x
     type: 'heatmap',
     colorscale: 'Viridis',
     reversescale: false,
@@ -159,10 +164,15 @@ export const generateTrajectoryData = (params) => {
   const data = [];
   
   if (currentArr && currentArr.length > 0) {
+    // Create a transposed version of currentArr
+    const transposedCurrentArr = currentArr[0].map((_, colIndex) => 
+      currentArr.map(row => row[colIndex])
+    );
+
     data.push({
-      z: currentArr,
-      x: zArray,
-      y: tArray,
+      z: transposedCurrentArr,
+      x: tArray,
+      y: zArray,
       type: 'heatmap',
       colorscale: 'RdBu',
       reversescale: true,
@@ -172,8 +182,8 @@ export const generateTrajectoryData = (params) => {
     });
 
     data.push({
-      x: [-detectorL, -detectorL],
-      y: [Math.min(...tArray), Math.max(...tArray)],
+      y: [-detectorL, -detectorL],
+      x: [Math.min(...tArray), Math.max(...tArray)],
       mode: 'lines',
       line: { dash: 'dot', color: 'red', width: 2 },
       name: 'Detector Position (z=-L)'
@@ -189,8 +199,8 @@ export const generateTrajectoryData = (params) => {
     
     trajectories.forEach(traj => {
       data.push({
-        x: traj,
-        y: tRefined,
+        y: traj,
+        x: tRefined,
         mode: 'lines',
         name: '',
         showlegend: false,

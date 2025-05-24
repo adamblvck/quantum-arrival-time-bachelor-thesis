@@ -14,7 +14,7 @@ sim_data, parameters, timestamp = load_simulation_data(pickle_file)
 """
 
 
-def save_simulation_data(simulation_data, params, base_dir='simulations'):
+def save_simulation_data(simulation_data, params, base_dir='simulations', extra_postfix='default'):
     """
     Saves simulation data and parameters to a pickle file.
     
@@ -40,7 +40,7 @@ def save_simulation_data(simulation_data, params, base_dir='simulations'):
     }
     
     # Create filename
-    filename = os.path.join(base_dir, f'simulation_{timestamp}.pkl')
+    filename = os.path.join(base_dir, f'simulation_{timestamp}_{extra_postfix}.pkl')
     
     # Save to pickle file
     with open(filename, 'wb') as f:

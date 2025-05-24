@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.fft import fft2, ifft2          # modern pocketfft backend
 
 def simulate_2d_spin(
     x_min=-20, x_max=20, Nx=128,
@@ -10,6 +11,7 @@ def simulate_2d_spin(
     mag_barrier_center_y=0.0,
     mag_barrier_strength=5.0,
     mag_barrier_width=0.5,
+    barrier_type='gaussian',
     # If you still want "gravity" or any other shared potential
     use_gravity=True,
     g=9.81,
@@ -74,10 +76,25 @@ def simulate_2d_spin(
 
 
     # --- Gaussian barrier --- 
-    # magnetic_barrier = mag_barrier_strength * np.exp(
-    #     -(((X - mag_barrier_center_x)**2 + (Y - mag_barrier_center_y)**2)
-    #       / (2 * mag_barrier_width**2))
-    # )
+    magnetic_barrier = np.zeros_like(X)
+
+    if barrier_type == 'gaussian':
+        magnetic_barrier = mag_barrier_strength * np.exp(
+            -(((X - mag_barrier_center_x)**2 + (Y - mag_barrier_center_y)**2)
+            / (2 * mag_barrier_width**2))
+        )
+    elif barrier_type == 'square':
+        magnetic_barrier = mag_barrier_strength * np.where(
+            ((X - mag_barrier_center_x)**2 + (Y - mag_barrier_center_y)**2) <= mag_barrier_width**2,
+            1.0, 0.0
+        )
+    elif barrier_type == 'circular':    
+        magnetic_barrier = mag_barrier_strength * np.where(
+            ((X - mag_barrier_center_x)**2 + (Y - mag_barrier_center_y)**2) <= (mag_barrier_width/2)**2,
+            1.0, 0.0
+        )
+    else:
+        raise ValueError(f"Invalid barrier type: {barrier_type}")
 
     # --- Square Barrier ---
     # magnetic_barrier = mag_barrier_strength * np.where(
@@ -86,10 +103,10 @@ def simulate_2d_spin(
     # )
 
     # --- Circular Barrier ---
-    magnetic_barrier = mag_barrier_strength * np.where(
-        ((X - mag_barrier_center_x)**2 + (Y - mag_barrier_center_y)**2) <= (mag_barrier_width/2)**2,
-        1.0, 0.0
-    )
+    # magnetic_barrier = mag_barrier_strength * np.where(
+    #     ((X - mag_barrier_center_x)**2 + (Y - mag_barrier_center_y)**2) <= (mag_barrier_width/2)**2,
+    #     1.0, 0.0
+    # )
 
     if use_gravity:
         common_potential = m * g * Y  # same for both spins
@@ -140,59 +157,37 @@ def simulate_2d_spin(
     prob_up_storage = []
     prob_down_storage = []
 
-    jx_up_storage = []
-    jy_up_storage = []
-    jx_down_storage = []
-    jy_down_storage = []
-
-    # probabilities of spin in X direction
-    prob_x_plus_storage = []
-    prob_x_min_storage = []
+    # Store wavefunctions - need to copy to avoid overwriting as psi_up and psi_down evolve over time
+    psi_up_list.append(psi_up.copy())
+    psi_down_list.append(psi_down.copy())
 
     # --- 7) Main time evolution loop ---
     for _ in range(n_steps):
 
-        # Store wavefunctions - need to copy to avoid overwriting as psi_up and psi_down evolve over time
-        psi_up_list.append(psi_up.copy())
-        psi_down_list.append(psi_down.copy())
-
         # Store probability densities
         prob_up_storage.append(np.abs(psi_up)**2)
         prob_down_storage.append(np.abs(psi_down)**2)
-
-        # Compute probability currents for each spin component.
-        #   j = (ħ/(2m)) * Im( ψ* dψ/dx )  (and similarly for dy).
-        dpsi_up_dx = np.gradient(psi_up, dx, axis=1)
-        dpsi_up_dy = np.gradient(psi_up, dy, axis=0)
-        dpsi_down_dx = np.gradient(psi_down, dx, axis=1)
-        dpsi_down_dy = np.gradient(psi_down, dy, axis=0)
-
-        jx_up = (hbar/(2*m)) * np.imag(np.conjugate(psi_up) * dpsi_up_dx)
-        jy_up = (hbar/(2*m)) * np.imag(np.conjugate(psi_up) * dpsi_up_dy)
-        jx_down = (hbar/(2*m)) * np.imag(np.conjugate(psi_down) * dpsi_down_dx)
-        jy_down = (hbar/(2*m)) * np.imag(np.conjugate(psi_down) * dpsi_down_dy)
-
-        jx_up_storage.append(jx_up)
-        jy_up_storage.append(jy_up)
-        jx_down_storage.append(jx_down)
-        jy_down_storage.append(jy_down)
 
         # --- First half-step: potential operator ---
         psi_up *= potential_phase_up
         psi_down *= potential_phase_down
 
         # --- Full kinetic step: FFT -> multiply -> IFFT for each spin ---
-        psi_up = np.fft.ifft2( kinetic_phase * np.fft.fft2(psi_up) )
-        psi_down = np.fft.ifft2( kinetic_phase * np.fft.fft2(psi_down) )
+        psi_up = ifft2( kinetic_phase * fft2(psi_up, workers=-1), workers=-1)
+        psi_down = ifft2(kinetic_phase * fft2(psi_down, workers=-1), workers=-1)
 
         # --- Second half-step: potential operator ---
         psi_up *= potential_phase_up
         psi_down *= potential_phase_down
 
-        # -- apply cap please
+        # -- apply cap / boundaray absorption if needed - please
         #
         #
         #
+
+        # Store wavefunctions - need to copy to avoid overwriting as psi_up and psi_down evolve over time
+        psi_up_list.append(psi_up.copy())
+        psi_down_list.append(psi_down.copy())
 
 
     # --- 8) Return data ---
@@ -201,14 +196,7 @@ def simulate_2d_spin(
         
         "prob_up": [p.tolist() for p in prob_up_storage], # real
         "prob_down": [p.tolist() for p in prob_down_storage], # real
-        "jx_up": [jx.tolist() for jx in jx_up_storage], # real
-        "jy_up": [jy.tolist() for jy in jy_up_storage], # real
-        "jx_down": [jx.tolist() for jx in jx_down_storage], # real
-        "jy_down": [jy.tolist() for jy in jy_down_storage], # real
         
         "psi_up_list": [p.tolist() for p in psi_up_list],         # complex arrays
         "psi_down_list": [p.tolist() for p in psi_down_list],     # complex arrays
-
-        # "prob_x_plus": [p.tolist() for p in prob_x_plus_storage], # real
-        # "prob_x_min": [p.tolist() for p in prob_x_min_storage], # real
     }
