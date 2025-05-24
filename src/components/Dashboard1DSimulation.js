@@ -24,6 +24,9 @@ import {
   interpolateVelocity
 } from '../physics/plotting';
 
+// Add new imports for icons (you'll need to install @heroicons/react)
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+
 /**
  * Example InfoModal component
  */
@@ -228,6 +231,9 @@ const Dashboard = () => {
   // Add these new state variables near the top with other states
   const [isSimulating, setIsSimulating] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  // Add state for mobile menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   /**
    * ---------------------------------------
@@ -486,314 +492,335 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex h-screen">
-      {/* Static sidebars container */}
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Mobile Header */}
+      <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+        >
+          {isMobileMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+        </button>
+        <h1 className="text-xl font-bold">Quantum Arrival Time</h1>
+      </div>
+
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar */}
-        <div className="w-1/5 min-w-[300px] border-r border-gray-300 p-4 overflow-y-auto">
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold mb-2">Quantum Simulator</h1>
-              <p className="text-gray-600 text-sm mb-2">
-                Simulate quantum wave packet dynamics, falling under gravity past a barrier.
-              </p>
-              <button 
-                onClick={() => setIsModalOpen(true)} 
-                className="text-blue-500 hover:text-blue-600 text-sm pb-2jo mb-2"
-              >
-                Learn more
-              </button>
-              <p className="border-t pt-2 text-gray-600 text-sm mb-4">
-                Author: Adam 'Blvck' Blazejczak<br/>
-                Promotor: Ward Struyve<br/>
-                Co-Promotor: Jef Hooyberghs<br/>
-                Date: 2025-02-10
-              </p>
-              
-            </div>
-            {/* Potential Controls */}
-            <div>
-              <h2 className="text-xl font-bold mb-2 border-t pt-2">Potential</h2>
-              <label className="block mb-2">
-                <span className="font-semibold">Type:</span>
-                <select 
-                  value={barrierType} 
-                  onChange={(e) => setBarrierType(e.target.value)}
-                  className="ml-2 border p-1 rounded"
-                >
-                  <option value="delta">Delta Barrier</option>
-                  <option value="gaussian">Gaussian Barrier</option>
-                  <option value="doubleGaussian">Double Gaussian Barrier</option>
-                  <option value="squareWell">Square Well</option>
-                </select>
-              </label>
-              {barrierType === 'delta' && (
-                <div className="space-y-2">
-                  <label className="block">
-                    Alpha:
-                    <input 
-                      type="number" 
-                      value={deltaAlpha} 
-                      onChange={(e) => setDeltaAlpha(parseFloat(e.target.value))}
-                      className="ml-2 border p-1 rounded w-20"
-                    />
-                  </label>
-                  <label className="block">
-                    z0:
-                    <input 
-                      type="number" 
-                      value={deltaZ0} 
-                      onChange={(e) => setDeltaZ0(parseFloat(e.target.value))}
-                      className="ml-2 border p-1 rounded w-20"
-                    />
-                  </label>
+        {/* Left Sidebar - Collapsible on mobile */}
+        <div className={`
+          fixed lg:relative lg:flex
+          ${isMobileMenuOpen ? 'flex' : 'hidden'}
+          z-40 bg-white
+          w-full lg:w-1/5 lg:min-w-[300px]
+          h-full overflow-y-auto
+          border-r border-gray-300
+        `}>
+          <div className="flex flex-col flex-1 p-4 space-y-6">
+            {/* Main content wrapper with bottom padding */}
+            <div className="pb-48">
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-2xl font-bold mb-2">Quantum Arrival Time</h1>
+                  <p className="text-gray-600 text-sm mb-2">
+                    Simulate quantum wave packet dynamics, falling under gravity past a barrier.
+                  </p>
+                  <button 
+                    onClick={() => setIsModalOpen(true)} 
+                    className="text-blue-500 hover:text-blue-600 text-sm pb-2 mb-2"
+                  >
+                    Learn more
+                  </button>
+                  <p className="border-t pt-2 text-gray-600 text-sm mb-4">
+                    Author: Adam 'Blvck' Blazejczak<br/>
+                    Promotor: Ward Struyve<br/>
+                    Co-Promotor: Jef Hooyberghs<br/>
+                    Date: 2025-02-10
+                  </p>
                 </div>
-              )}
-              {barrierType === 'squareWell' && (
-                <div className="space-y-2">
-                  <label className="block">
-                    V0:
-                    <input 
-                      type="number" 
-                      value={gaussV0} 
-                      onChange={(e) => setGaussV0(parseFloat(e.target.value))}
-                      className="ml-2 border p-1 rounded w-20"
-                    />
+                {/* Potential Controls */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2 border-t pt-2">Potential</h2>
+                  <label className="block mb-2">
+                    <span className="font-semibold">Type:</span>
+                    <select 
+                      value={barrierType} 
+                      onChange={(e) => setBarrierType(e.target.value)}
+                      className="ml-2 border p-1 rounded"
+                    >
+                      <option value="delta">Delta Barrier</option>
+                      <option value="gaussian">Gaussian Barrier</option>
+                      <option value="doubleGaussian">Double Gaussian Barrier</option>
+                      <option value="squareWell">Square Well</option>
+                    </select>
                   </label>
-                  <label className="block">
-                    barrier width:
-                    <input 
-                      type="number" 
-                      value={gaussSigma} 
-                      onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
-                      className="ml-2 border p-1 rounded w-20"
-                      step="0.1"
-                      min="0"
-                    />
-                  </label>
-                  <label className="block">
-                    z0:
-                    <input 
-                      type="number" 
-                      value={gaussZ0} 
-                      onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
-                      className="ml-2 border p-1 rounded w-20"
-                    />
-                  </label>
+                  {barrierType === 'delta' && (
+                    <div className="space-y-2">
+                      <label className="block">
+                        Alpha:
+                        <input 
+                          type="number" 
+                          value={deltaAlpha} 
+                          onChange={(e) => setDeltaAlpha(parseFloat(e.target.value))}
+                          className="ml-2 border p-1 rounded w-20"
+                        />
+                      </label>
+                      <label className="block">
+                        z0:
+                        <input 
+                          type="number" 
+                          value={deltaZ0} 
+                          onChange={(e) => setDeltaZ0(parseFloat(e.target.value))}
+                          className="ml-2 border p-1 rounded w-20"
+                        />
+                      </label>
+                    </div>
+                  )}
+                  {barrierType === 'squareWell' && (
+                    <div className="space-y-2">
+                      <label className="block">
+                        V0:
+                        <input 
+                          type="number" 
+                          value={gaussV0} 
+                          onChange={(e) => setGaussV0(parseFloat(e.target.value))}
+                          className="ml-2 border p-1 rounded w-20"
+                        />
+                      </label>
+                      <label className="block">
+                        barrier width:
+                        <input 
+                          type="number" 
+                          value={gaussSigma} 
+                          onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
+                          className="ml-2 border p-1 rounded w-20"
+                          step="0.1"
+                          min="0"
+                        />
+                      </label>
+                      <label className="block">
+                        z0:
+                        <input 
+                          type="number" 
+                          value={gaussZ0} 
+                          onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
+                          className="ml-2 border p-1 rounded w-20"
+                        />
+                      </label>
+                    </div>
+                  )}
+                  {barrierType === 'gaussian' && (
+                    <div className="space-y-2">
+                      <label className="block">
+                        V0:
+                        <input 
+                          type="number" 
+                          value={gaussV0} 
+                          onChange={(e) => setGaussV0(parseFloat(e.target.value))}
+                          className="ml-2 border p-1 rounded w-20"
+                        />
+                      </label>
+                      <label className="block">
+                        sigma:
+                        <input 
+                          type="number" 
+                          value={gaussSigma} 
+                          onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
+                          className="ml-2 border p-1 rounded w-20"
+                          step="0.1"
+                          min="-999999"
+                        />
+                      </label>
+                      <label className="block">
+                        z0:
+                        <input 
+                          type="number" 
+                          value={gaussZ0} 
+                          onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
+                          className="ml-2 border p-1 rounded w-20"
+                        />
+                      </label>
+                    </div>
+                  )}
+                  {barrierType === 'doubleGaussian' && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="font-bold">Gaussian 1</h3>
+                        <label className="block">
+                          V0:
+                          <input 
+                            type="number" 
+                            value={gaussV0} 
+                            onChange={(e) => setGaussV0(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                          />
+                        </label>
+                        <label className="block">
+                          sigma:
+                          <input 
+                            type="number" 
+                            value={gaussSigma} 
+                            onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                            step="0.1"
+                            min="-999999"
+                          />
+                        </label>
+                        <label className="block">
+                          z0:
+                          <input 
+                            type="number" 
+                            value={gaussZ0} 
+                            onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                          />
+                        </label>
+                      </div>
+                      <div>
+                        <h3 className="font-bold">Gaussian 2</h3>
+                        <label className="block">
+                          V0:
+                          <input 
+                            type="number" 
+                            value={gauss2V0} 
+                            onChange={(e) => setGauss2V0(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                          />
+                        </label>
+                        <label className="block">
+                          sigma:
+                          <input 
+                            type="number" 
+                            value={gauss2Sigma} 
+                            onChange={(e) => setGauss2Sigma(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                            step="0.1"
+                            min="-999999"
+                          />
+                        </label>
+                        <label className="block">
+                          z0:
+                          <input 
+                            type="number" 
+                            value={gauss2Z0} 
+                            onChange={(e) => setGauss2Z0(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-              {barrierType === 'gaussian' && (
-                <div className="space-y-2">
-                  <label className="block">
-                    V0:
-                    <input 
-                      type="number" 
-                      value={gaussV0} 
-                      onChange={(e) => setGaussV0(parseFloat(e.target.value))}
-                      className="ml-2 border p-1 rounded w-20"
-                    />
-                  </label>
-                  <label className="block">
-                    sigma:
-                    <input 
-                      type="number" 
-                      value={gaussSigma} 
-                      onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
-                      className="ml-2 border p-1 rounded w-20"
-                      step="0.1"
-                      min="-999999"
-                    />
-                  </label>
-                  <label className="block">
-                    z0:
-                    <input 
-                      type="number" 
-                      value={gaussZ0} 
-                      onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
-                      className="ml-2 border p-1 rounded w-20"
-                    />
-                  </label>
-                </div>
-              )}
-              {barrierType === 'doubleGaussian' && (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-bold">Gaussian 1</h3>
+                {/* Wave Packet Controls */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Wave Packet Controls</h2>
+                  <div className="space-y-2">
                     <label className="block">
-                      V0:
-                      <input 
-                        type="number" 
-                        value={gaussV0} 
-                        onChange={(e) => setGaussV0(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
-                      />
-                    </label>
-                    <label className="block">
-                      sigma:
-                      <input 
-                        type="number" 
-                        value={gaussSigma} 
-                        onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
-                        step="0.1"
-                        min="-999999"
-                      />
-                    </label>
-                    <label className="block">
-                      z0:
-                      <input 
-                        type="number" 
-                        value={gaussZ0} 
-                        onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
-                      />
-                    </label>
-                  </div>
-                  <div>
-                    <h3 className="font-bold">Gaussian 2</h3>
-                    <label className="block">
-                      V0:
-                      <input 
-                        type="number" 
-                        value={gauss2V0} 
-                        onChange={(e) => setGauss2V0(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
-                      />
-                    </label>
-                    <label className="block">
-                      sigma:
-                      <input 
-                        type="number" 
-                        value={gauss2Sigma} 
-                        onChange={(e) => setGauss2Sigma(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
-                        step="0.1"
-                        min="-999999"
-                      />
-                    </label>
-                    <label className="block">
-                      z0:
-                      <input 
-                        type="number" 
-                        value={gauss2Z0} 
-                        onChange={(e) => setGauss2Z0(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
-                      />
-                    </label>
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* Wave Packet Controls */}
-            <div>
-              <h2 className="text-xl font-bold mb-2">Wave Packet Controls</h2>
-              <div className="space-y-2">
-                <label className="block">
-                  First Wave Packet z0:
-                  <input 
-                    type="number"
-                    value={z0Packet}
-                    onChange={(e) => setZ0Packet(parseFloat(e.target.value))}
-                    className="ml-2 border p-1 rounded w-20"
-                  />
-                </label>
-                <label className="block">
-                  First Wave Packet p0:
-                  <input 
-                    type="number"
-                    value={p0Packet}
-                    onChange={(e) => setP0Packet(parseFloat(e.target.value))}
-                    className="ml-2 border p-1 rounded w-20"
-                  />
-                </label>
-                <label className="block">
-                  Use Superposition:
-                  <input 
-                    type="checkbox"
-                    checked={useSuperposition}
-                    onChange={(e) => setUseSuperposition(e.target.checked)}
-                    className="ml-2"
-                  />
-                </label>
-                {useSuperposition && (
-                  <div className="ml-4 space-y-2">
-                    <h3 className="font-bold">Second Wave Packet</h3>
-                    <label className="block">
-                      z0 (2nd):
+                      First Wave Packet z0:
                       <input 
                         type="number"
-                        value={z0Packet2}
-                        onChange={(e) => setZ0Packet2(parseFloat(e.target.value))}
+                        value={z0Packet}
+                        onChange={(e) => setZ0Packet(parseFloat(e.target.value))}
                         className="ml-2 border p-1 rounded w-20"
                       />
                     </label>
                     <label className="block">
-                      p0 (2nd):
+                      First Wave Packet p0:
                       <input 
                         type="number"
-                        value={p0Packet2}
-                        onChange={(e) => setP0Packet2(parseFloat(e.target.value))}
+                        value={p0Packet}
+                        onChange={(e) => setP0Packet(parseFloat(e.target.value))}
                         className="ml-2 border p-1 rounded w-20"
                       />
                     </label>
                     <label className="block">
-                      sigma (2nd):
+                      Use Superposition:
                       <input 
-                        type="number"
-                        value={sigmaPacket2}
-                        onChange={(e) => setSigmaPacket2(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
+                        type="checkbox"
+                        checked={useSuperposition}
+                        onChange={(e) => setUseSuperposition(e.target.checked)}
+                        className="ml-2"
                       />
                     </label>
+                    {useSuperposition && (
+                      <div className="ml-4 space-y-2">
+                        <h3 className="font-bold">Second Wave Packet</h3>
+                        <label className="block">
+                          z0 (2nd):
+                          <input 
+                            type="number"
+                            value={z0Packet2}
+                            onChange={(e) => setZ0Packet2(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                          />
+                        </label>
+                        <label className="block">
+                          p0 (2nd):
+                          <input 
+                            type="number"
+                            value={p0Packet2}
+                            onChange={(e) => setP0Packet2(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                          />
+                        </label>
+                        <label className="block">
+                          sigma (2nd):
+                          <input 
+                            type="number"
+                            value={sigmaPacket2}
+                            onChange={(e) => setSigmaPacket2(parseFloat(e.target.value))}
+                            className="ml-2 border p-1 rounded w-20"
+                          />
+                        </label>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+                {/* Save/Load Section */}
+                <div className="border-t pt-4">
+                  <details className="cursor-pointer">
+                    <summary className="text-xl font-bold mb-2">Save & Load</summary>
+                    <div className="space-y-2 mt-2">
+                      <input 
+                        type="text"
+                        value={simName}
+                        onChange={(e) => setSimName(e.target.value)}
+                        className="border p-1 rounded w-full"
+                        placeholder="Simulation name"
+                      />
+                      <button 
+                        onClick={handleSaveSimulation}
+                        className="bg-blue-500 text-white px-3 py-1 rounded w-full"
+                      >
+                        Save Simulation
+                      </button>
+                      <h4 className="font-semibold mt-2">Saved Simulations:</h4>
+                      <ul className="max-h-32 overflow-auto border p-2 rounded">
+                        {savedSims.map((s, idx) => (
+                          <li key={idx} className="flex justify-between items-center mb-1">
+                            <div className="mr-2">{s.name}</div>
+                            <div className="flex space-x-1">
+                              <button 
+                                onClick={() => handleLoadSimulation(idx)}
+                                className="bg-green-400 text-white px-2 py-1 rounded"
+                              >
+                                Load
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSimulation(s.timestamp)}
+                                className="bg-red-400 text-white px-2 py-1 rounded"
+                              >
+                                Del
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </details>
+                </div>
               </div>
             </div>
-            {/* Save/Load Section */}
-            <div className="border-t pt-4">
-              <details className="cursor-pointer">
-                <summary className="text-xl font-bold mb-2">Save & Load</summary>
-                <div className="space-y-2 mt-2">
-                  <input 
-                    type="text"
-                    value={simName}
-                    onChange={(e) => setSimName(e.target.value)}
-                    className="border p-1 rounded w-full"
-                    placeholder="Simulation name"
-                  />
-                  <button 
-                    onClick={handleSaveSimulation}
-                    className="bg-blue-500 text-white px-3 py-1 rounded w-full"
-                  >
-                    Save Simulation
-                  </button>
-                  <h4 className="font-semibold mt-2">Saved Simulations:</h4>
-                  <ul className="max-h-32 overflow-auto border p-2 rounded">
-                    {savedSims.map((s, idx) => (
-                      <li key={idx} className="flex justify-between items-center mb-1">
-                        <div className="mr-2">{s.name}</div>
-                        <div className="flex space-x-1">
-                          <button 
-                            onClick={() => handleLoadSimulation(idx)}
-                            className="bg-green-400 text-white px-2 py-1 rounded"
-                          >
-                            Load
-                          </button>
-                          <button
-                            onClick={() => handleDeleteSimulation(s.timestamp)}
-                            className="bg-red-400 text-white px-2 py-1 rounded"
-                          >
-                            Del
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </details>
-            </div>
 
-            {/* Sticky footer */}
+            {/* Sticky footer with logos */}
             <div className="fixed bottom-4 left-4 flex flex-row items-center gap-8 w-80">
               <img 
                 src="./assets/uhasselt-liggend.png" 
@@ -806,32 +833,171 @@ const Dashboard = () => {
                 className="w-1/3 object-contain"
               />
             </div>
-
           </div>
         </div>
-        {/* Center Content */}
-        <div className="flex-1 p-4 overflow-y-auto">
-          <div className="space-y-4">
-            <div className="flex-1">
-              <div className="flex items-center mb-2">
-                <h3 className="text-lg font-semibold">Probability Density Heatmap</h3>
-                <InfoButton onClick={() => setActiveExplanation('probabilityDensity')} />
-              </div>
-              <Plot
-                data={heatmapData}
-                layout={{
-                  width: undefined,
-                  height: 400,
-                  autosize: true,
-                  margin: { t: 30, l: 50, r: 10, b: 40 },
-                  xaxis: { title: 'time (s)' },
-                  yaxis: { title: 'z', range: [xMin, xMax] },
-                }}
-                useResizeHandler
-                style={{ width: '100%', height: '400px' }}
-              />
+
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Right Sidebar Content (moved to top on mobile) */}
+          <div className="lg:hidden p-4 border-b">
+            <h2 className="text-xl font-bold mb-4">Simulation Controls</h2>
+            <div className="space-y-2">
+              <label className="block">
+                xMin:
+                <input 
+                  type="number"
+                  value={xMin}
+                  onChange={(e) => setXMin(parseFloat(e.target.value))}
+                  className="ml-2 border p-1 rounded w-16"
+                  step="any"
+                />
+              </label>
+              <label className="block">
+                xMax:
+                <input 
+                  type="number"
+                  value={xMax}
+                  onChange={(e) => setXMax(parseFloat(e.target.value))}
+                  className="ml-2 border p-1 rounded w-16"
+                />
+              </label>
+              <label className="block">
+                Nx:
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="number"
+                    value={Nx}
+                    onChange={(e) => setNx(parseInt(e.target.value))}
+                    className="ml-2 border p-1 rounded w-16"
+                  />
+                  <button
+                    onClick={() => setNx(prev => Math.max(2, prev / 2))}
+                    className="px-2 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                    title="Halve Nx"
+                  >
+                    /2
+                  </button>
+                  <button
+                    onClick={() => setNx(prev => prev * 2)}
+                    className="px-2 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                    title="Double Nx"
+                  >
+                    *2
+                  </button>
+                </div>
+              </label>
+              <label className="block">
+                nSteps:
+                <input 
+                  type="number"
+                  value={nSteps}
+                  onChange={(e) => setNSteps(parseInt(e.target.value))}
+                  className="ml-2 border p-1 rounded w-16"
+                />
+              </label>
+              <label className="block">
+                dt:
+                <input 
+                  type="number"
+                  value={dt}
+                  onChange={(e) => setDt(parseFloat(e.target.value))}
+                  className="ml-2 border p-1 rounded w-16"
+                  step="0.001"
+                />
+              </label>
+              <label className="block">
+                Detector at -L:
+                <input 
+                  type="number"
+                  value={detectorL}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val)) setDetectorL(val);
+                  }}
+                  className="ml-2 border p-1 rounded w-20"
+                  step="any"
+                />
+              </label>
+              {/* Particle Trajectory Parameters */}
+              <label className="block">
+                Bohmian Trajectory Spawn Center:
+                <input 
+                  type="number"
+                  value={particleSpawnCenter}
+                  onChange={(e) => setParticleSpawnCenter(parseFloat(e.target.value))}
+                  className="ml-2 border p-1 rounded w-20"
+                />
+              </label>
+              <label className="block">
+                Bohmian Trajectory Spawn Width:
+                <input 
+                  type="number"
+                  value={particleSpawnWidth}
+                  onChange={(e) => setParticleSpawnWidth(parseFloat(e.target.value))}
+                  className="ml-2 border p-1 rounded w-20"
+                />
+              </label>
+              <label className="block">
+                Num Particles:
+                <input 
+                  type="number"
+                  value={numParticles}
+                  onChange={(e) => setNumParticles(parseInt(e.target.value))}
+                  className="ml-2 border p-1 rounded w-20"
+                />
+              </label>
+              {/* NEW: Trajectory Integration Factor Control */}
+              {/* <label className="block">
+                Trajectory Integration Factor:
+                <input 
+                  type="number"
+                  value={trajIntegrationFactor}
+                  onChange={(e) => setTrajIntegrationFactor(parseFloat(e.target.value))}
+                  className="ml-2 border p-1 rounded w-20"
+                  step="0.1"
+                />
+                <small className="block text-xs text-gray-600">
+                  Lower this value for finer integration.
+                </small>
+              </label> */}
+              <label className="block">
+                Show Trajectories:
+                <input 
+                  type="checkbox"
+                  checked={showTrajectories}
+                  onChange={(e) => setShowTrajectories(e.target.checked)}
+                  className="ml-2"
+                />
+              </label>
             </div>
-            <div className="flex-1 mt-4">
+            <div className="space-y-2">
+              <button 
+                onClick={handleRunSimulation}
+                className={`w-full px-3 py-2 rounded font-medium transition-colors ${
+                  isSimulating 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
+                } text-white`}
+                disabled={isSimulating}
+              >
+                {isSimulating ? 'Simulating...' : 'Run Simulation'}
+              </button>
+
+              {/* Simple loading indicator */}
+              <div className={`transition-all duration-300 ${
+                isSimulating ? 'opacity-100 h-8' : 'opacity-0 h-0'
+              }`}>
+                <div className="text-sm text-gray-600 text-center">
+                  Computing quantum dynamics...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="p-4 space-y-6">
+            {/* 1D Probability Density Plot */}
+            <div className="flex-1">
               <div className="flex items-center mb-2">
                 <h3 className="text-lg font-semibold">Probability Density in 1D</h3>
                 <InfoButton onClick={() => setActiveExplanation('probabilityCurrent')} />
@@ -858,6 +1024,53 @@ const Dashboard = () => {
                 style={{ width: '100%', height: '300px' }}
               />
             </div>
+
+            {/* Time Slider - Moved below 1D plot */}
+            <div className="p-4 bg-white rounded-lg shadow">
+              <h3 className="font-semibold mb-2">Time Control</h3>
+              <input 
+                className="w-full"
+                type="range"
+                min="0"
+                max={(probArr.length - 1) || 0}
+                value={tIndex}
+                onChange={handleTimeSliderChange}
+                disabled={!probArr || probArr.length === 0}
+              />
+              <div className="flex space-x-2 mt-2">
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded"
+                  disabled={!probArr || probArr.length === 0}
+                >
+                  {isPlaying ? 'Pause' : 'Play'}
+                </button>
+                <span>T = {tArray[tIndex] ? tArray[tIndex].toFixed(3) : 0}</span>
+              </div>
+            </div>
+
+            {/* Heatmap */}
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <h3 className="text-lg font-semibold">Probability Density Heatmap</h3>
+                <InfoButton onClick={() => setActiveExplanation('probabilityDensity')} />
+              </div>
+              <Plot
+                data={heatmapData}
+                layout={{
+                  width: undefined,
+                  height: 400,
+                  autosize: true,
+                  margin: { t: 30, l: 50, r: 10, b: 40 },
+                  xaxis: { title: 'time (s)' },
+                  yaxis: { title: 'z', range: [xMin, xMax] },
+                }}
+                useResizeHandler
+                style={{ width: '100%', height: '400px' }}
+              />
+            </div>
+
+            {/* Probability Current & Bohmian Trajectories */}
             <div className="flex-1 mt-4">
               <div className="flex items-center mb-2">
                 <h3 className="text-lg font-semibold">Probability Current & Bohmian Trajectories</h3>
@@ -872,37 +1085,17 @@ const Dashboard = () => {
                   margin: { t: 50, l: 50, r: 50, b: 40 },
                   xaxis: { title: 'time (s)'},
                   yaxis: { title: 'z', range: [xMin, xMax] },
-                  showlegend: true,
+                  showlegend: false,
                 }}
                 useResizeHandler
                 style={{ width: '100%', height: '400px' }}
               />
             </div>
-            {/* <div className="flex-1 mt-4">
-              <div className="flex items-center mb-2">
-                <h3 className="text-lg font-semibold">Time of Arrival From Paper</h3>
-                <InfoButton onClick={() => setActiveExplanation('potentialEnergy')} />
-              </div>
-              <Plot
-                data={arrivalTimeData}
-                layout={{
-                  width: undefined,
-                  height: 300,
-                  autosize: true,
-                  margin: { t: 50, l: 50, r: 50, b: 40 },
-                  xaxis: { title: 'Time τ' },
-                  yaxis: { title: 'Density / Current' },
-                  showlegend: true,
-                  legend: { x: 0.5, y: 1.15, xanchor: 'center', orientation: 'h' },
-                }}
-                useResizeHandler
-                style={{ width: '100%', height: '300px' }}
-              />
-            </div> */}
-            <div className="flex-1 mt-4">
 
+            {/* Arrival Time Distribution from probability current */}
+            <div className="flex-1 mt-4">
               <div className="flex items-center mb-2">
-                <h3 className="text-lg font-semibold">Arrival Time Distribution from Probability Current</h3>
+                <h3 className="text-lg font-semibold">Arrival Time Distribution</h3>
                 <InfoButton onClick={() => setActiveExplanation('arrivalTimeDistribution')} />
               </div>
               
@@ -924,8 +1117,9 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        {/* Right Sidebar */}
-        <div className="w-1/5 min-w-[250px] border-l border-gray-300 p-4 pt-20 overflow-y-auto">
+
+        {/* Right Sidebar - Hidden on mobile */}
+        <div className="hidden lg:block w-1/5 min-w-[250px] border-l border-gray-300 p-4 overflow-y-auto">
           <div className="space-y-4">
             <h2 className="text-xl font-bold">Simulation Controls</h2>
             <div className="space-y-2">
@@ -1080,29 +1274,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="mt-4">
-              <h3 className="border-t pt-2 font-semibold">Time Slider</h3>
-              <input 
-                className="w-full"
-                type="range"
-                min="0"
-                max={(probArr.length - 1) || 0}
-                value={tIndex}
-                onChange={handleTimeSliderChange}
-                disabled={!probArr || probArr.length === 0}
-              />
-              <div className="flex space-x-2 mt-2">
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded"
-                  disabled={!probArr || probArr.length === 0}
-                >
-                  {isPlaying ? 'Pause' : 'Play'}
-                </button>
-                <span>T = {tArray[tIndex] ? tArray[tIndex].toFixed(3) : 0}</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="font-semibold">Wavefunction Distribution:</h3>
+              <h3 className="border-t pt-2 font-semibold">Wavefunction Distribution:</h3>
               <p>
                 x &lt; 0 (Transmitted):{" "}
                 {(() => {
@@ -1220,12 +1392,22 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
       <InfoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <ExplanationModal
         isOpen={!!activeExplanation}
         onClose={() => setActiveExplanation(null)}
         content={activeExplanation ? explanations[activeExplanation] : ''}
       />
+
+      {/* Mobile menu overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@
   "author": "Adam 'Blvck' Blazejczak",
   "private": true,
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "cra-template": "1.2.0",
     "fft-js": "^0.0.12",
     "katex": "^0.16.18",
