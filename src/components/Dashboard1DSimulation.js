@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import Plot from 'react-plotly.js';
-import { fft, ifft } from 'fft-js';
-import { debounce } from 'lodash';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
@@ -25,12 +23,42 @@ import {
 } from '../physics/plotting';
 
 // Add new imports for icons (you'll need to install @heroicons/react)
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+
+// Create Theme Context
+const ThemeContext = createContext({
+  isDark: false,
+  toggleTheme: () => {},
+});
+
+// Theme Provider Component
+const ThemeProvider = ({ children }) => {
+  const [isDark, setIsDark] = useState(() => {
+    // Check local storage or system preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) return savedTheme === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    // Update document class and local storage when theme changes
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark(!isDark);
+
+  return (
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
 
 /**
  * Example InfoModal component
  */
-const InfoModal = ({ isOpen, onClose }) => {
+const InfoModal = ({ isOpen, onClose, isDark }) => {
   if (!isOpen) return null;
 
   const markdown = `# Quantum Simulation Info
@@ -67,13 +95,13 @@ For more information about each graph, click on the info button next to each gra
   `;
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded shadow-md max-w-2xl w-full overflow-y-auto max-h-[90vh]">
+    <div className={`fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`bg-white p-6 rounded shadow-md max-w-2xl w-full overflow-y-auto max-h-[90vh] ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="prose prose-sm max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkMath]}
             rehypePlugins={[rehypeKatex]}
-            className="space-y-4 text-gray-700"
+            className={`space-y-4 text-${isDark ? 'gray-300' : 'gray-700'}`}
             components={{
               h1: ({node, ...props}) => <h1 className="text-3xl font-bold my-4" {...props} />,
               h2: ({node, ...props}) => <h2 className="text-2xl font-bold my-3" {...props} />,
@@ -88,7 +116,7 @@ For more information about each graph, click on the info button next to each gra
         </div>
         <button 
           onClick={onClose} 
-          className="mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+          className={`mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors ${isDark ? 'bg-gray-700' : 'bg-gray-800'}`}
         >
           Close
         </button>
@@ -97,17 +125,17 @@ For more information about each graph, click on the info button next to each gra
   );
 };
 
-const ExplanationModal = ({ isOpen, onClose, content }) => {
+const ExplanationModal = ({ isOpen, onClose, content, isDark }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded shadow-md max-w-2xl w-full overflow-y-auto max-h-[90vh]">
+    <div className={`fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`bg-white p-6 rounded shadow-md max-w-2xl w-full overflow-y-auto max-h-[90vh] ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="prose prose-sm max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkMath]}
             rehypePlugins={[rehypeKatex]}
-            className="space-y-4 text-gray-700"
+            className={`space-y-4 text-${isDark ? 'gray-300' : 'gray-700'}`}
             components={{
               h1: ({node, ...props}) => <h1 className="text-3xl font-bold my-4" {...props} />,
               h2: ({node, ...props}) => <h2 className="text-2xl font-bold my-3" {...props} />,
@@ -122,7 +150,7 @@ const ExplanationModal = ({ isOpen, onClose, content }) => {
         </div>
         <button 
           onClick={onClose} 
-          className="mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+          className={`mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors ${isDark ? 'bg-gray-700' : 'bg-gray-800'}`}
         >
           Close
         </button>
@@ -150,6 +178,8 @@ const initDB = () => {
 };
 
 const Dashboard = () => {
+  const { isDark, toggleTheme } = useContext(ThemeContext);
+
   /**
    * -------------------------------
    * 1) State for PDE / Potential
@@ -159,11 +189,11 @@ const Dashboard = () => {
   const [barrierType, setBarrierType] = useState('gaussian'); 
   
   // Delta-barrier parameters
-  const [deltaAlpha, setDeltaAlpha] = useState(15.0); // strength of the barrier - gamme in Siddhant Das Paper
+  const [deltaAlpha, setDeltaAlpha] = useState(8.0); // strength of the barrier - gamme in Siddhant Das Paper
   const [deltaZ0, setDeltaZ0] = useState(0.0);
 
   // Gaussian-barrier parameters (for single Gaussian)
-  const [gaussV0, setGaussV0] = useState(12.0);
+  const [gaussV0, setGaussV0] = useState(10.0);
   const [gaussSigma, setGaussSigma] = useState(1);
   const [gaussZ0, setGaussZ0] = useState(0.0);
 
@@ -491,17 +521,43 @@ const Dashboard = () => {
     }
   };
 
+  // Update plot themes based on dark mode
+  const getPlotTheme = () => ({
+    plot_bgcolor: isDark ? '#1f2937' : '#ffffff',
+    paper_bgcolor: isDark ? '#1f2937' : '#ffffff',
+    font: {
+      color: isDark ? '#ffffff' : '#000000',
+    },
+    xaxis: {
+      gridcolor: isDark ? '#374151' : '#e5e7eb',
+      zerolinecolor: isDark ? '#374151' : '#e5e7eb',
+    },
+    yaxis: {
+      gridcolor: isDark ? '#374151' : '#e5e7eb',
+      zerolinecolor: isDark ? '#374151' : '#e5e7eb',
+    },
+  });
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className={`flex flex-col min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b">
+      <div className={`lg:hidden flex items-center justify-between p-4 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+          className={`p-2 rounded-md ${isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}
         >
           {isMobileMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
         </button>
-        <h1 className="text-xl font-bold">Quantum Arrival Time</h1>
+        <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            Quantum Arrival Time
+        </h1>
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          className={`p-2 rounded-md ${isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          {isDark ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}
+        </button>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
@@ -509,42 +565,69 @@ const Dashboard = () => {
         <div className={`
           fixed lg:relative lg:flex
           ${isMobileMenuOpen ? 'flex' : 'hidden'}
-          z-40 bg-white
+          z-40 ${isDark ? 'bg-gray-800' : 'bg-white'}
           w-full lg:w-1/5 lg:min-w-[300px]
           h-full overflow-y-auto
-          border-r border-gray-300
+          border-r ${isDark ? 'border-gray-700' : 'border-gray-300'}
         `}>
           <div className="flex flex-col flex-1 p-4 space-y-6">
+            {/* Add theme toggle at the top of sidebar */}
+            <div className="flex justify-between items-center">
+              <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                Quantum Arrival Time
+              </h1>
+              <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-md ${
+                  isDark 
+                    ? 'text-gray-300 hover:bg-gray-700' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {isDark ? (
+                  <SunIcon className="h-6 w-6" />
+                ) : (
+                  <MoonIcon className="h-6 w-6" />
+                )}
+              </button>
+            </div>
+            
             {/* Main content wrapper with bottom padding */}
             <div className="pb-48">
               <div className="space-y-6">
                 <div>
-                  <h1 className="text-2xl font-bold mb-2">Quantum Arrival Time</h1>
-                  <p className="text-gray-600 text-sm mb-2">
+                  <h1 className={`lg:hidden text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Quantum Arrival Time
+                  </h1>
+                  <p className={`text-${isDark ? 'gray-300' : 'gray-600'} text-sm mb-2`}>
                     Simulate quantum wave packet dynamics, falling under gravity past a barrier.
                   </p>
                   <button 
                     onClick={() => setIsModalOpen(true)} 
-                    className="text-blue-500 hover:text-blue-600 text-sm pb-2 mb-2"
+                    className={`text-${isDark ? 'gray-300' : 'blue-500'} hover:text-${isDark ? 'gray-400' : 'blue-600'} text-sm pb-2 mb-2`}
                   >
                     Learn more
                   </button>
-                  <p className="border-t pt-2 text-gray-600 text-sm mb-4">
+                  <p className={`border-t pt-2 ${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm mb-4`}>
                     Author: Adam 'Blvck' Blazejczak<br/>
                     Promotor: Ward Struyve<br/>
                     Co-Promotor: Jef Hooyberghs<br/>
-                    Date: 2025-02-10
+                    <br/>
+                    Bachelor Thesis Extra Credit Project<br/>
+                    University of Hasselt & KU Leuven<br/>
+                    Date: 2025-05-27
                   </p>
                 </div>
                 {/* Potential Controls */}
                 <div>
-                  <h2 className="text-xl font-bold mb-2 border-t pt-2">Potential</h2>
-                  <label className="block mb-2">
-                    <span className="font-semibold">Type:</span>
+                  <h2 className={`text-xl font-bold mb-2 border-t pt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Potential</h2>
+                  <label className={`block mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                    <span className={`font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Type:</span>
                     <select 
                       value={barrierType} 
                       onChange={(e) => setBarrierType(e.target.value)}
-                      className="ml-2 border p-1 rounded"
+                      className={`ml-2 border p-1 rounded ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                     >
                       <option value="delta">Delta Barrier</option>
                       <option value="gaussian">Gaussian Barrier</option>
@@ -554,88 +637,88 @@ const Dashboard = () => {
                   </label>
                   {barrierType === 'delta' && (
                     <div className="space-y-2">
-                      <label className="block">
+                      <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                         Alpha:
                         <input 
                           type="number" 
                           value={deltaAlpha} 
                           onChange={(e) => setDeltaAlpha(parseFloat(e.target.value))}
-                          className="ml-2 border p-1 rounded w-20"
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                         />
                       </label>
-                      <label className="block">
+                      <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                         z0:
                         <input 
                           type="number" 
                           value={deltaZ0} 
                           onChange={(e) => setDeltaZ0(parseFloat(e.target.value))}
-                          className="ml-2 border p-1 rounded w-20"
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                         />
                       </label>
                     </div>
                   )}
                   {barrierType === 'squareWell' && (
                     <div className="space-y-2">
-                      <label className="block">
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                         V0:
                         <input 
                           type="number" 
                           value={gaussV0} 
                           onChange={(e) => setGaussV0(parseFloat(e.target.value))}
-                          className="ml-2 border p-1 rounded w-20"
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                         />
                       </label>
-                      <label className="block">
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                         barrier width:
                         <input 
                           type="number" 
                           value={gaussSigma} 
                           onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
-                          className="ml-2 border p-1 rounded w-20"
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                           step="0.1"
                           min="0"
                         />
                       </label>
-                      <label className="block">
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                         z0:
                         <input 
                           type="number" 
                           value={gaussZ0} 
                           onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
-                          className="ml-2 border p-1 rounded w-20"
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                         />
                       </label>
                     </div>
                   )}
                   {barrierType === 'gaussian' && (
                     <div className="space-y-2">
-                      <label className="block">
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                         V0:
                         <input 
                           type="number" 
                           value={gaussV0} 
                           onChange={(e) => setGaussV0(parseFloat(e.target.value))}
-                          className="ml-2 border p-1 rounded w-20"
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                         />
                       </label>
-                      <label className="block">
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                         sigma:
                         <input 
                           type="number" 
                           value={gaussSigma} 
                           onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
-                          className="ml-2 border p-1 rounded w-20"
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                           step="0.1"
                           min="-999999"
                         />
                       </label>
-                      <label className="block">
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                         z0:
                         <input 
                           type="number" 
                           value={gaussZ0} 
                           onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
-                          className="ml-2 border p-1 rounded w-20"
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                         />
                       </label>
                     </div>
@@ -643,66 +726,66 @@ const Dashboard = () => {
                   {barrierType === 'doubleGaussian' && (
                     <div className="space-y-4">
                       <div>
-                        <h3 className="font-bold">Gaussian 1</h3>
-                        <label className="block">
+                        <h3 className="font-bold dark:text-white">Gaussian 1</h3>
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           V0:
                           <input 
                             type="number" 
                             value={gaussV0} 
                             onChange={(e) => setGaussV0(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                           />
                         </label>
-                        <label className="block">
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           sigma:
                           <input 
                             type="number" 
                             value={gaussSigma} 
                             onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                             step="0.1"
                             min="-999999"
                           />
                         </label>
-                        <label className="block">
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           z0:
                           <input 
                             type="number" 
                             value={gaussZ0} 
                             onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                           />
                         </label>
                       </div>
                       <div>
-                        <h3 className="font-bold">Gaussian 2</h3>
-                        <label className="block">
+                        <h3 className="font-bold dark:text-white">Gaussian 2</h3>
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           V0:
                           <input 
                             type="number" 
                             value={gauss2V0} 
                             onChange={(e) => setGauss2V0(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                           />
                         </label>
-                        <label className="block">
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           sigma:
                           <input 
                             type="number" 
                             value={gauss2Sigma} 
                             onChange={(e) => setGauss2Sigma(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                             step="0.1"
                             min="-999999"
                           />
                         </label>
-                        <label className="block">
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           z0:
                           <input 
                             type="number" 
                             value={gauss2Z0} 
                             onChange={(e) => setGauss2Z0(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                           />
                         </label>
                       </div>
@@ -711,63 +794,63 @@ const Dashboard = () => {
                 </div>
                 {/* Wave Packet Controls */}
                 <div>
-                  <h2 className="text-xl font-bold mb-2">Wave Packet Controls</h2>
+                  <h2 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Wave Packet Controls</h2>
                   <div className="space-y-2">
-                    <label className="block">
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                       First Wave Packet z0:
                       <input 
                         type="number"
                         value={z0Packet}
                         onChange={(e) => setZ0Packet(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
+                        className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                       />
                     </label>
-                    <label className="block">
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                       First Wave Packet p0:
                       <input 
                         type="number"
                         value={p0Packet}
                         onChange={(e) => setP0Packet(parseFloat(e.target.value))}
-                        className="ml-2 border p-1 rounded w-20"
+                        className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                       />
                     </label>
-                    <label className="block">
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                       Use Superposition:
                       <input 
                         type="checkbox"
                         checked={useSuperposition}
                         onChange={(e) => setUseSuperposition(e.target.checked)}
-                        className="ml-2"
+                        className={`ml-2 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}
                       />
                     </label>
                     {useSuperposition && (
                       <div className="ml-4 space-y-2">
-                        <h3 className="font-bold">Second Wave Packet</h3>
-                        <label className="block">
+                        <h3 className={`font-bold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Second Wave Packet</h3>
+                        <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           z0 (2nd):
                           <input 
                             type="number"
                             value={z0Packet2}
                             onChange={(e) => setZ0Packet2(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                           />
                         </label>
-                        <label className="block">
+                        <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           p0 (2nd):
                           <input 
                             type="number"
                             value={p0Packet2}
                             onChange={(e) => setP0Packet2(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                           />
                         </label>
-                        <label className="block">
+                        <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                           sigma (2nd):
                           <input 
                             type="number"
                             value={sigmaPacket2}
                             onChange={(e) => setSigmaPacket2(parseFloat(e.target.value))}
-                            className="ml-2 border p-1 rounded w-20"
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                           />
                         </label>
                       </div>
@@ -777,18 +860,18 @@ const Dashboard = () => {
                 {/* Save/Load Section */}
                 <div className="border-t pt-4">
                   <details className="cursor-pointer">
-                    <summary className="text-xl font-bold mb-2">Save & Load</summary>
+                    <summary className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Save & Load</summary>
                     <div className="space-y-2 mt-2">
                       <input 
                         type="text"
                         value={simName}
                         onChange={(e) => setSimName(e.target.value)}
-                        className="border p-1 rounded w-full"
+                        className={`border p-1 rounded w-full ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                         placeholder="Simulation name"
                       />
                       <button 
                         onClick={handleSaveSimulation}
-                        className="bg-blue-500 text-white px-3 py-1 rounded w-full"
+                        className={`bg-blue-500 text-white px-3 py-1 rounded w-full ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-800 hover:bg-gray-700'}`}
                       >
                         Save Simulation
                       </button>
@@ -800,13 +883,13 @@ const Dashboard = () => {
                             <div className="flex space-x-1">
                               <button 
                                 onClick={() => handleLoadSimulation(idx)}
-                                className="bg-green-400 text-white px-2 py-1 rounded"
+                                className={`bg-green-400 text-white px-2 py-1 rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-800 hover:bg-gray-700'}`}
                               >
                                 Load
                               </button>
                               <button
                                 onClick={() => handleDeleteSimulation(s.timestamp)}
-                                className="bg-red-400 text-white px-2 py-1 rounded"
+                                className={`bg-red-400 text-white px-2 py-1 rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-800 hover:bg-gray-700'}`}
                               >
                                 Del
                               </button>
@@ -825,7 +908,7 @@ const Dashboard = () => {
               <img 
                 src="./assets/uhasselt-liggend.png" 
                 alt="UHasselt Logo" 
-                className="w-1/3 object-contain"
+                className="w-1/3 object-contain bg-white p-2 m-2"
               />
               <img 
                 src="./assets/KU_Leuven_logo.png" 
@@ -839,73 +922,73 @@ const Dashboard = () => {
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto">
           {/* Right Sidebar Content (moved to top on mobile) */}
-          <div className="lg:hidden p-4 border-b">
-            <h2 className="text-xl font-bold mb-4">Simulation Controls</h2>
+          <div className={`lg:hidden p-4 border-b ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Simulation Controls</h2>
             <div className="space-y-2">
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 xMin:
                 <input 
                   type="number"
                   value={xMin}
                   onChange={(e) => setXMin(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-16"
+                  className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                   step="any"
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 xMax:
                 <input 
                   type="number"
                   value={xMax}
                   onChange={(e) => setXMax(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-16"
+                  className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Nx:
                 <div className="flex items-center gap-2">
                   <input 
                     type="number"
                     value={Nx}
                     onChange={(e) => setNx(parseInt(e.target.value))}
-                    className="ml-2 border p-1 rounded w-16"
+                    className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                   />
                   <button
                     onClick={() => setNx(prev => Math.max(2, prev / 2))}
-                    className="px-2 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                    className={`px-2 py-1 text-sm rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
                     title="Halve Nx"
                   >
                     /2
                   </button>
                   <button
                     onClick={() => setNx(prev => prev * 2)}
-                    className="px-2 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                    className={`px-2 py-1 text-sm rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
                     title="Double Nx"
                   >
                     *2
                   </button>
                 </div>
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 nSteps:
                 <input 
                   type="number"
                   value={nSteps}
                   onChange={(e) => setNSteps(parseInt(e.target.value))}
-                  className="ml-2 border p-1 rounded w-16"
+                  className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 dt:
                 <input 
                   type="number"
                   value={dt}
                   onChange={(e) => setDt(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-16"
+                  className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                   step="0.001"
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Detector at -L:
                 <input 
                   type="number"
@@ -914,59 +997,45 @@ const Dashboard = () => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val)) setDetectorL(val);
                   }}
-                  className="ml-2 border p-1 rounded w-20"
+                  className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                   step="any"
                 />
               </label>
               {/* Particle Trajectory Parameters */}
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Bohmian Trajectory Spawn Center:
                 <input 
                   type="number"
                   value={particleSpawnCenter}
                   onChange={(e) => setParticleSpawnCenter(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-20"
+                  className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Bohmian Trajectory Spawn Width:
                 <input 
                   type="number"
                   value={particleSpawnWidth}
                   onChange={(e) => setParticleSpawnWidth(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-20"
+                  className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Num Particles:
                 <input 
                   type="number"
                   value={numParticles}
                   onChange={(e) => setNumParticles(parseInt(e.target.value))}
-                  className="ml-2 border p-1 rounded w-20"
+                  className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                 />
               </label>
-              {/* NEW: Trajectory Integration Factor Control */}
-              {/* <label className="block">
-                Trajectory Integration Factor:
-                <input 
-                  type="number"
-                  value={trajIntegrationFactor}
-                  onChange={(e) => setTrajIntegrationFactor(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-20"
-                  step="0.1"
-                />
-                <small className="block text-xs text-gray-600">
-                  Lower this value for finer integration.
-                </small>
-              </label> */}
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Show Trajectories:
                 <input 
                   type="checkbox"
                   checked={showTrajectories}
                   onChange={(e) => setShowTrajectories(e.target.checked)}
-                  className="ml-2"
+                  className={`ml-2 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}
                 />
               </label>
             </div>
@@ -976,7 +1045,9 @@ const Dashboard = () => {
                 className={`w-full px-3 py-2 rounded font-medium transition-colors ${
                   isSimulating 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
+                    : isDark
+                      ? 'bg-green-600 hover:bg-green-700 active:bg-green-800'
+                      : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
                 } text-white`}
                 disabled={isSimulating}
               >
@@ -987,7 +1058,7 @@ const Dashboard = () => {
               <div className={`transition-all duration-300 ${
                 isSimulating ? 'opacity-100 h-8' : 'opacity-0 h-0'
               }`}>
-                <div className="text-sm text-gray-600 text-center">
+                <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} text-center`}>
                   Computing quantum dynamics...
                 </div>
               </div>
@@ -999,37 +1070,47 @@ const Dashboard = () => {
             {/* 1D Probability Density Plot */}
             <div className="flex-1">
               <div className="flex items-center mb-2">
-                <h3 className="text-lg font-semibold">Probability Density in 1D</h3>
+                <h3 className={`text-lg font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Probability Density in 1D</h3>
                 <InfoButton onClick={() => setActiveExplanation('probabilityCurrent')} />
               </div>
               <Plot
                 data={lineData}
                 layout={{
+                  ...getPlotTheme(),
                   width: undefined,
                   height: 300,
                   autosize: true,
                   margin: { t: 50, l: 50, r: 50, b: 40 },
-                  xaxis: { title: 'z', range: [xMin, xMax] },
-                  yaxis: { title: '|ψ|²', side: 'left' },
+                  xaxis: { 
+                    title: 'z',
+                    range: [xMin, xMax],
+                    ...getPlotTheme().xaxis
+                  },
+                  yaxis: { 
+                    title: '|ψ|²',
+                    side: 'left',
+                    ...getPlotTheme().yaxis
+                  },
                   yaxis2: { 
-                    title: 'V(z)', 
+                    title: 'V(z)',
                     overlaying: 'y',
                     side: 'right',
                     showgrid: false,
+                    ...getPlotTheme().yaxis
                   },
                   showlegend: true,
                   legend: { x: 0.5, y: 1.15, xanchor: 'center', orientation: 'h' },
                 }}
                 useResizeHandler
-                style={{ width: '100%', height: '300px' }}
+                style={{ width: '100%', height: '300px', borderRadius: '10px', overflow: 'hidden' }}
               />
             </div>
 
             {/* Time Slider - Moved below 1D plot */}
-            <div className="p-4 bg-white rounded-lg shadow">
-              <h3 className="font-semibold mb-2">Time Control</h3>
+            <div className={`p-4 ${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow`}>
+              <h3 className={`font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Time Control</h3>
               <input 
-                className="w-full"
+                className={`w-full ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
                 type="range"
                 min="0"
                 max={(probArr.length - 1) || 0}
@@ -1040,24 +1121,27 @@ const Dashboard = () => {
               <div className="flex space-x-2 mt-2">
                 <button
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded"
+                  className={`${isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white px-3 py-1 rounded`}
                   disabled={!probArr || probArr.length === 0}
                 >
                   {isPlaying ? 'Pause' : 'Play'}
                 </button>
-                <span>T = {tArray[tIndex] ? tArray[tIndex].toFixed(3) : 0}</span>
+                <span className={isDark ? 'text-white' : 'text-gray-900'}>
+                  T = {tArray[tIndex] ? tArray[tIndex].toFixed(3) : 0}
+                </span>
               </div>
             </div>
 
             {/* Heatmap */}
             <div className="flex-1">
               <div className="flex items-center mb-2">
-                <h3 className="text-lg font-semibold">Probability Density Heatmap</h3>
+                <h3 className={`text-lg font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Probability Density Heatmap</h3>
                 <InfoButton onClick={() => setActiveExplanation('probabilityDensity')} />
               </div>
               <Plot
                 data={heatmapData}
                 layout={{
+                  ...getPlotTheme(),
                   width: undefined,
                   height: 400,
                   autosize: true,
@@ -1066,19 +1150,20 @@ const Dashboard = () => {
                   yaxis: { title: 'z', range: [xMin, xMax] },
                 }}
                 useResizeHandler
-                style={{ width: '100%', height: '400px' }}
+                style={{ width: '100%', height: '400px', borderRadius: '10px', overflow: 'hidden'  }}
               />
             </div>
 
             {/* Probability Current & Bohmian Trajectories */}
             <div className="flex-1 mt-4">
               <div className="flex items-center mb-2">
-                <h3 className="text-lg font-semibold">Probability Current & Bohmian Trajectories</h3>
+                <h3 className={`text-lg font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Probability Current & Bohmian Trajectories</h3>
                 <InfoButton onClick={() => setActiveExplanation('bohmianTrajectories')} />
               </div>
               <Plot
                 data={trajectoryData}
                 layout={{
+                  ...getPlotTheme(),
                   width: undefined,
                   height: 400,
                   autosize: true,
@@ -1088,20 +1173,21 @@ const Dashboard = () => {
                   showlegend: false,
                 }}
                 useResizeHandler
-                style={{ width: '100%', height: '400px' }}
+                style={{ width: '100%', height: '400px', borderRadius: '10px', overflow: 'hidden'  }}
               />
             </div>
 
             {/* Arrival Time Distribution from probability current */}
             <div className="flex-1 mt-4">
               <div className="flex items-center mb-2">
-                <h3 className="text-lg font-semibold">Arrival Time Distribution</h3>
+                <h3 className={`text-lg font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Arrival Time Distribution</h3>
                 <InfoButton onClick={() => setActiveExplanation('arrivalTimeDistribution')} />
               </div>
               
               <Plot
                 data={arrivalTimesData}
                 layout={{
+                  ...getPlotTheme(),
                   width: undefined,
                   height: 300,
                   autosize: true,
@@ -1112,81 +1198,109 @@ const Dashboard = () => {
                   legend: { x: 0.5, y: 1.15, xanchor: 'center', orientation: 'h' },
                 }}
                 useResizeHandler
-                style={{ width: '100%', height: '300px' }}
+                style={{ width: '100%', height: '300px', borderRadius: '10px', overflow: 'hidden'  }}
               />
             </div>
           </div>
         </div>
 
         {/* Right Sidebar - Hidden on mobile */}
-        <div className="hidden lg:block w-1/5 min-w-[250px] border-l border-gray-300 p-4 overflow-y-auto">
+        <div className={`hidden lg:block w-1/5 min-w-[250px] border-l ${isDark ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-white'} p-4 overflow-y-auto`}>
           <div className="space-y-4">
-            <h2 className="text-xl font-bold">Simulation Controls</h2>
+            <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Simulation Controls</h2>
             <div className="space-y-2">
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 xMin:
                 <input 
                   type="number"
                   value={xMin}
                   onChange={(e) => setXMin(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-16"
+                  className={`ml-2 border p-1 rounded w-16 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                      : 'bg-white border-gray-300'
+                  }`}
                   step="any"
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 xMax:
                 <input 
                   type="number"
                   value={xMax}
                   onChange={(e) => setXMax(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-16"
+                  className={`ml-2 border p-1 rounded w-16 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                      : 'bg-white border-gray-300'
+                  }`}
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Nx:
                 <div className="flex items-center gap-2">
                   <input 
                     type="number"
                     value={Nx}
                     onChange={(e) => setNx(parseInt(e.target.value))}
-                    className="ml-2 border p-1 rounded w-16"
+                    className={`ml-2 border p-1 rounded w-16 ${
+                      isDark 
+                        ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                        : 'bg-white border-gray-300'
+                    }`}
                   />
                   <button
                     onClick={() => setNx(prev => Math.max(2, prev / 2))}
-                    className="px-2 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                    className={`px-2 py-1 text-sm rounded ${
+                      isDark 
+                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' 
+                        : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
                     title="Halve Nx"
                   >
                     /2
                   </button>
                   <button
                     onClick={() => setNx(prev => prev * 2)}
-                    className="px-2 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                    className={`px-2 py-1 text-sm rounded ${
+                      isDark 
+                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' 
+                        : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
                     title="Double Nx"
                   >
                     *2
                   </button>
                 </div>
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 nSteps:
                 <input 
                   type="number"
                   value={nSteps}
                   onChange={(e) => setNSteps(parseInt(e.target.value))}
-                  className="ml-2 border p-1 rounded w-16"
+                  className={`ml-2 border p-1 rounded w-16 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                      : 'bg-white border-gray-300'
+                  }`}
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 dt:
                 <input 
                   type="number"
                   value={dt}
                   onChange={(e) => setDt(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-16"
+                  className={`ml-2 border p-1 rounded w-16 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                      : 'bg-white border-gray-300'
+                  }`}
                   step="0.001"
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Detector at -L:
                 <input 
                   type="number"
@@ -1195,59 +1309,65 @@ const Dashboard = () => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val)) setDetectorL(val);
                   }}
-                  className="ml-2 border p-1 rounded w-20"
+                  className={`ml-2 border p-1 rounded w-20 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                      : 'bg-white border-gray-300'
+                  }`}
                   step="any"
                 />
               </label>
               {/* Particle Trajectory Parameters */}
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Bohmian Trajectory Spawn Center:
                 <input 
                   type="number"
                   value={particleSpawnCenter}
                   onChange={(e) => setParticleSpawnCenter(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-20"
+                  className={`ml-2 border p-1 rounded w-20 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                      : 'bg-white border-gray-300'
+                  }`}
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Bohmian Trajectory Spawn Width:
                 <input 
                   type="number"
                   value={particleSpawnWidth}
                   onChange={(e) => setParticleSpawnWidth(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-20"
+                  className={`ml-2 border p-1 rounded w-20 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                      : 'bg-white border-gray-300'
+                  }`}
                 />
               </label>
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Num Particles:
                 <input 
                   type="number"
                   value={numParticles}
                   onChange={(e) => setNumParticles(parseInt(e.target.value))}
-                  className="ml-2 border p-1 rounded w-20"
+                  className={`ml-2 border p-1 rounded w-20 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                      : 'bg-white border-gray-300'
+                  }`}
                 />
               </label>
-              {/* NEW: Trajectory Integration Factor Control */}
-              {/* <label className="block">
-                Trajectory Integration Factor:
-                <input 
-                  type="number"
-                  value={trajIntegrationFactor}
-                  onChange={(e) => setTrajIntegrationFactor(parseFloat(e.target.value))}
-                  className="ml-2 border p-1 rounded w-20"
-                  step="0.1"
-                />
-                <small className="block text-xs text-gray-600">
-                  Lower this value for finer integration.
-                </small>
-              </label> */}
-              <label className="block">
+              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Show Trajectories:
                 <input 
                   type="checkbox"
                   checked={showTrajectories}
                   onChange={(e) => setShowTrajectories(e.target.checked)}
-                  className="ml-2"
+                  className={`ml-2 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600' 
+                      : 'bg-white border-gray-300'
+                  }`}
                 />
               </label>
             </div>
@@ -1257,7 +1377,9 @@ const Dashboard = () => {
                 className={`w-full px-3 py-2 rounded font-medium transition-colors ${
                   isSimulating 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
+                    : isDark
+                      ? 'bg-green-600 hover:bg-green-700 active:bg-green-800'
+                      : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
                 } text-white`}
                 disabled={isSimulating}
               >
@@ -1268,14 +1390,16 @@ const Dashboard = () => {
               <div className={`transition-all duration-300 ${
                 isSimulating ? 'opacity-100 h-8' : 'opacity-0 h-0'
               }`}>
-                <div className="text-sm text-gray-600 text-center">
+                <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} text-center`}>
                   Computing quantum dynamics...
                 </div>
               </div>
             </div>
             <div className="mt-4">
-              <h3 className="border-t pt-2 font-semibold">Wavefunction Distribution:</h3>
-              <p>
+              <h3 className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'} pt-2 font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                Wavefunction Distribution:
+              </h3>
+              <p className={`${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 x &lt; 0 (Transmitted):{" "}
                 {(() => {
                   if (!probArr || zArray.length < 2 || !cumulativeLossArrLeft || !cumulativeLossArrRight) return 0;
@@ -1297,7 +1421,7 @@ const Dashboard = () => {
                 })()}
                 %
               </p>
-              <p>
+              <p className={`${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 x ≥ 0 (Reflected):{" "}
                 {(() => {
                   if (!probArr || zArray.length < 2 || !cumulativeLossArrLeft || !cumulativeLossArrRight) return 0;
@@ -1319,7 +1443,7 @@ const Dashboard = () => {
                 })()}
                 %
               </p>
-              <p>
+              <p className={`${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Left Loss:{" "}
                 {(() => {
                   if (!probArr || zArray.length < 2 || !cumulativeLossArrLeft || !cumulativeLossArrRight) return 0;
@@ -1341,8 +1465,7 @@ const Dashboard = () => {
                 })()}
                 %
               </p>
-
-              <p>
+              <p className={`${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Right Loss:{" "}
                 {(() => {
                   if (!probArr || zArray.length < 2 || !cumulativeLossArrLeft || !cumulativeLossArrRight) return 0;
@@ -1364,8 +1487,7 @@ const Dashboard = () => {
                 })()}
                 %
               </p>
-
-              <p>
+              <p className={`${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                 Total Loss:{" "}
                 {(() => {
                   if (!probArr || zArray.length < 2 || !cumulativeLossArrLeft || !cumulativeLossArrRight) return 0;
@@ -1387,18 +1509,18 @@ const Dashboard = () => {
                 })()}
                 %
               </p>
-              
             </div>
           </div>
         </div>
       </div>
 
       {/* Modals */}
-      <InfoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <InfoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} isDark={isDark} />
       <ExplanationModal
         isOpen={!!activeExplanation}
         onClose={() => setActiveExplanation(null)}
         content={activeExplanation ? explanations[activeExplanation] : ''}
+        isDark={isDark}
       />
 
       {/* Mobile menu overlay */}
@@ -1412,4 +1534,11 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+// Wrap the Dashboard with ThemeProvider
+const DashboardWithTheme = () => (
+  <ThemeProvider>
+    <Dashboard />
+  </ThemeProvider>
+);
+
+export default DashboardWithTheme;

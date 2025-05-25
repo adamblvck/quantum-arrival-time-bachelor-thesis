@@ -146,14 +146,49 @@ The accuracy of the FFT in the kinetic step and the Euler method for trajectory 
   `,
 };
 
-export const InfoButton = ({ onClick }) => (
+export const InfoButton = ({ onClick, isDark }) => (
   <button
     onClick={onClick}
-    className="ml-2 p-1 text-sm text-blue-500 hover:text-blue-700 focus:outline-none"
+    className={`ml-2 p-1 text-sm focus:outline-none ${
+      isDark 
+        ? 'text-blue-400 hover:text-blue-300' 
+        : 'text-blue-500 hover:text-blue-700'
+    }`}
     title="Learn more"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      className="h-5 w-5" 
+      viewBox="0 0 20 20" 
+      fill="currentColor"
+    >
+      <path 
+        fillRule="evenodd" 
+        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" 
+        clipRule="evenodd" 
+      />
     </svg>
   </button>
+);
+
+// Add a new component for rendering explanations with dark mode support
+export const ExplanationContent = ({ content, isDark }) => (
+  <ReactMarkdown
+    remarkPlugins={[remarkMath]}
+    rehypePlugins={[rehypeKatex]}
+    className={`prose ${isDark ? 'prose-invert' : ''} max-w-none`}
+    components={{
+      h1: ({node, ...props}) => <h1 className={`text-3xl font-bold my-4 ${isDark ? 'text-white' : 'text-gray-900'}`} {...props} />,
+      h2: ({node, ...props}) => <h2 className={`text-2xl font-bold my-3 ${isDark ? 'text-white' : 'text-gray-900'}`} {...props} />,
+      h3: ({node, ...props}) => <h3 className={`text-xl font-bold my-2 ${isDark ? 'text-white' : 'text-gray-900'}`} {...props} />,
+      p: ({node, ...props}) => <p className={`my-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`} {...props} />,
+      a: ({node, ...props}) => <a className={`text-blue-500 hover:text-blue-600 ${isDark ? 'text-blue-400 hover:text-blue-300' : ''}`} {...props} />,
+      code: ({node, ...props}) => <code className={`px-1 py-0.5 rounded ${isDark ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-800'}`} {...props} />,
+      ul: ({node, ...props}) => <ul className={`list-disc pl-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`} {...props} />,
+      li: ({node, ...props}) => <li className="my-1" {...props} />,
+      strong: ({node, ...props}) => <strong className={`font-bold ${isDark ? 'text-gray-200' : 'text-gray-900'}`} {...props} />,
+    }}
+  >
+    {content}
+  </ReactMarkdown>
 );
