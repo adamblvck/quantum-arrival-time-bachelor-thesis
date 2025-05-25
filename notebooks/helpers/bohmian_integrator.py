@@ -432,7 +432,7 @@ def get_velocity_field(
     vx_all = np.empty_like(psi_up_all, dtype=float)
     vy_all = np.empty_like(psi_up_all, dtype=float)
 
-    # Rebuild k-space grid
+    # Rebuild k-space grid - These are teh sampling frequencies of a DFT applied to our system here
     kx = 2*np.pi*np.fft.fftfreq(Nx, d=dx)      # shape (Nx,)
     ky = 2*np.pi*np.fft.fftfreq(Ny, d=dy)      # shape (Ny,)
     KX, KY = np.meshgrid(kx, ky, indexing='xy')# shapes (Ny, Nx)
