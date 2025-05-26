@@ -573,7 +573,7 @@ const Dashboard = () => {
           <div className="flex flex-col flex-1 p-4 space-y-6">
             {/* Add theme toggle at the top of sidebar */}
             <div className="flex justify-between items-center">
-              <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <h1 className={`hidden lg:visible text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 Quantum Arrival Time
               </h1>
               <button
@@ -620,7 +620,150 @@ const Dashboard = () => {
                   </p>
                 </div>
                 {/* Potential Controls */}
-                <div>
+                <div className={`visible lg:hidden p-4 border-b ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                  <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Simulation Controls</h2>
+                  <div className="space-y-2">
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      xMin:
+                      <input 
+                        type="number"
+                        value={xMin}
+                        onChange={(e) => setXMin(parseFloat(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        step="any"
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      xMax:
+                      <input 
+                        type="number"
+                        value={xMax}
+                        onChange={(e) => setXMax(parseFloat(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Nx:
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="number"
+                          value={Nx}
+                          onChange={(e) => setNx(parseInt(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        />
+                        <button
+                          onClick={() => setNx(prev => Math.max(2, prev / 2))}
+                          className={`px-2 py-1 text-sm rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
+                          title="Halve Nx"
+                        >
+                          /2
+                        </button>
+                        <button
+                          onClick={() => setNx(prev => prev * 2)}
+                          className={`px-2 py-1 text-sm rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
+                          title="Double Nx"
+                        >
+                          *2
+                        </button>
+                      </div>
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      nSteps:
+                      <input 
+                        type="number"
+                        value={nSteps}
+                        onChange={(e) => setNSteps(parseInt(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      dt:
+                      <input 
+                        type="number"
+                        value={dt}
+                        onChange={(e) => setDt(parseFloat(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        step="0.001"
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Detector at -L:
+                      <input 
+                        type="number"
+                        value={detectorL}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val)) setDetectorL(val);
+                        }}
+                        className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        step="any"
+                      />
+                    </label>
+                    {/* Particle Trajectory Parameters */}
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Bohmian Trajectory Spawn Center:
+                      <input 
+                        type="number"
+                        value={particleSpawnCenter}
+                        onChange={(e) => setParticleSpawnCenter(parseFloat(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Bohmian Trajectory Spawn Width:
+                      <input 
+                        type="number"
+                        value={particleSpawnWidth}
+                        onChange={(e) => setParticleSpawnWidth(parseFloat(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Num Particles:
+                      <input 
+                        type="number"
+                        value={numParticles}
+                        onChange={(e) => setNumParticles(parseInt(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Show Trajectories:
+                      <input 
+                        type="checkbox"
+                        checked={showTrajectories}
+                        onChange={(e) => setShowTrajectories(e.target.checked)}
+                        className={`ml-2 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}
+                      />
+                    </label>
+                  </div>
+                  <div className="space-y-2">
+                    <button 
+                      onClick={handleRunSimulation}
+                      className={`w-full px-3 py-2 rounded font-medium transition-colors ${
+                        isSimulating 
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : isDark
+                            ? 'bg-green-600 hover:bg-green-700 active:bg-green-800'
+                            : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
+                      } text-white`}
+                      disabled={isSimulating}
+                    >
+                      {isSimulating ? 'Simulating...' : 'Run Simulation'}
+                    </button>
+
+                    {/* Simple loading indicator */}
+                    <div className={`transition-all duration-300 ${
+                      isSimulating ? 'opacity-100 h-8' : 'opacity-0 h-0'
+                    }`}>
+                      <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} text-center`}>
+                        Computing quantum dynamics...
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="hidden lg:block">
                   <h2 className={`text-xl font-bold mb-2 border-t pt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Potential</h2>
                   <label className={`block mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                     <span className={`font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Type:</span>
@@ -793,7 +936,7 @@ const Dashboard = () => {
                   )}
                 </div>
                 {/* Wave Packet Controls */}
-                <div>
+                <div className="hidden lg:block">
                   <h2 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Wave Packet Controls</h2>
                   <div className="space-y-2">
                     <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
@@ -923,122 +1066,244 @@ const Dashboard = () => {
         <div className="flex-1 overflow-y-auto">
           {/* Right Sidebar Content (moved to top on mobile) */}
           <div className={`lg:hidden p-4 border-b ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-            <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Simulation Controls</h2>
-            <div className="space-y-2">
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                xMin:
-                <input 
-                  type="number"
-                  value={xMin}
-                  onChange={(e) => setXMin(parseFloat(e.target.value))}
-                  className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                  step="any"
-                />
-              </label>
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                xMax:
-                <input 
-                  type="number"
-                  value={xMax}
-                  onChange={(e) => setXMax(parseFloat(e.target.value))}
-                  className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                />
-              </label>
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                Nx:
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="number"
-                    value={Nx}
-                    onChange={(e) => setNx(parseInt(e.target.value))}
-                    className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                  />
-                  <button
-                    onClick={() => setNx(prev => Math.max(2, prev / 2))}
-                    className={`px-2 py-1 text-sm rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
-                    title="Halve Nx"
-                  >
-                    /2
-                  </button>
-                  <button
-                    onClick={() => setNx(prev => prev * 2)}
-                    className={`px-2 py-1 text-sm rounded ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'}`}
-                    title="Double Nx"
-                  >
-                    *2
-                  </button>
+            <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Simulation Setup</h2>
+            <div className="visible lg:hidden">
+                  <h2 className={`text-xl font-bold mb-2 border-t pt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Potential</h2>
+                  <label className={`block mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                    <span className={`font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Type:</span>
+                    <select 
+                      value={barrierType} 
+                      onChange={(e) => setBarrierType(e.target.value)}
+                      className={`ml-2 border p-1 rounded ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                    >
+                      <option value="delta">Delta Barrier</option>
+                      <option value="gaussian">Gaussian Barrier</option>
+                      <option value="doubleGaussian">Double Gaussian Barrier</option>
+                      <option value="squareWell">Square Well</option>
+                    </select>
+                  </label>
+                  {barrierType === 'delta' && (
+                    <div className="space-y-2">
+                      <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        Alpha:
+                        <input 
+                          type="number" 
+                          value={deltaAlpha} 
+                          onChange={(e) => setDeltaAlpha(parseFloat(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        />
+                      </label>
+                      <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        z0:
+                        <input 
+                          type="number" 
+                          value={deltaZ0} 
+                          onChange={(e) => setDeltaZ0(parseFloat(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        />
+                      </label>
+                    </div>
+                  )}
+                  {barrierType === 'squareWell' && (
+                    <div className="space-y-2">
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        V0:
+                        <input 
+                          type="number" 
+                          value={gaussV0} 
+                          onChange={(e) => setGaussV0(parseFloat(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                        />
+                      </label>
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        barrier width:
+                        <input 
+                          type="number" 
+                          value={gaussSigma} 
+                          onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                          step="0.1"
+                          min="0"
+                        />
+                      </label>
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        z0:
+                        <input 
+                          type="number" 
+                          value={gaussZ0} 
+                          onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                        />
+                      </label>
+                    </div>
+                  )}
+                  {barrierType === 'gaussian' && (
+                    <div className="space-y-2">
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        V0:
+                        <input 
+                          type="number" 
+                          value={gaussV0} 
+                          onChange={(e) => setGaussV0(parseFloat(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                        />
+                      </label>
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        sigma:
+                        <input 
+                          type="number" 
+                          value={gaussSigma} 
+                          onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                          step="0.1"
+                          min="-999999"
+                        />
+                      </label>
+                      <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        z0:
+                        <input 
+                          type="number" 
+                          value={gaussZ0} 
+                          onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
+                          className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                        />
+                      </label>
+                    </div>
+                  )}
+                  {barrierType === 'doubleGaussian' && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="font-bold dark:text-white">Gaussian 1</h3>
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          V0:
+                          <input 
+                            type="number" 
+                            value={gaussV0} 
+                            onChange={(e) => setGaussV0(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                          />
+                        </label>
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          sigma:
+                          <input 
+                            type="number" 
+                            value={gaussSigma} 
+                            onChange={(e) => setGaussSigma(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                            step="0.1"
+                            min="-999999"
+                          />
+                        </label>
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          z0:
+                          <input 
+                            type="number" 
+                            value={gaussZ0} 
+                            onChange={(e) => setGaussZ0(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                          />
+                        </label>
+                      </div>
+                      <div>
+                        <h3 className="font-bold dark:text-white">Gaussian 2</h3>
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          V0:
+                          <input 
+                            type="number" 
+                            value={gauss2V0} 
+                            onChange={(e) => setGauss2V0(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          />
+                        </label>
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          sigma:
+                          <input 
+                            type="number" 
+                            value={gauss2Sigma} 
+                            onChange={(e) => setGauss2Sigma(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                            step="0.1"
+                            min="-999999"
+                          />
+                        </label>
+                        <label className={`block font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          z0:
+                          <input 
+                            type="number" 
+                            value={gauss2Z0} 
+                            onChange={(e) => setGauss2Z0(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </label>
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                nSteps:
-                <input 
-                  type="number"
-                  value={nSteps}
-                  onChange={(e) => setNSteps(parseInt(e.target.value))}
-                  className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                />
-              </label>
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                dt:
-                <input 
-                  type="number"
-                  value={dt}
-                  onChange={(e) => setDt(parseFloat(e.target.value))}
-                  className={`ml-2 border p-1 rounded w-16 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                  step="0.001"
-                />
-              </label>
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                Detector at -L:
-                <input 
-                  type="number"
-                  value={detectorL}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    if (!isNaN(val)) setDetectorL(val);
-                  }}
-                  className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                  step="any"
-                />
-              </label>
-              {/* Particle Trajectory Parameters */}
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                Bohmian Trajectory Spawn Center:
-                <input 
-                  type="number"
-                  value={particleSpawnCenter}
-                  onChange={(e) => setParticleSpawnCenter(parseFloat(e.target.value))}
-                  className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                />
-              </label>
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                Bohmian Trajectory Spawn Width:
-                <input 
-                  type="number"
-                  value={particleSpawnWidth}
-                  onChange={(e) => setParticleSpawnWidth(parseFloat(e.target.value))}
-                  className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                />
-              </label>
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                Num Particles:
-                <input 
-                  type="number"
-                  value={numParticles}
-                  onChange={(e) => setNumParticles(parseInt(e.target.value))}
-                  className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
-                />
-              </label>
-              <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                Show Trajectories:
-                <input 
-                  type="checkbox"
-                  checked={showTrajectories}
-                  onChange={(e) => setShowTrajectories(e.target.checked)}
-                  className={`ml-2 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}
-                />
-              </label>
-            </div>
+                {/* Wave Packet Controls */}
+                <div className="visible lg:hidden">
+                  <h2 className={`text-xl font-bold mt-2 mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Wave Packet Controls</h2>
+                  <div className="space-y-2">
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      First Wave Packet z0:
+                      <input 
+                        type="number"
+                        value={z0Packet}
+                        onChange={(e) => setZ0Packet(parseFloat(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      First Wave Packet p0:
+                      <input 
+                        type="number"
+                        value={p0Packet}
+                        onChange={(e) => setP0Packet(parseFloat(e.target.value))}
+                        className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                      />
+                    </label>
+                    <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      Use Superposition:
+                      <input 
+                        type="checkbox"
+                        checked={useSuperposition}
+                        onChange={(e) => setUseSuperposition(e.target.checked)}
+                        className={`ml-2 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}
+                      />
+                    </label>
+                    {useSuperposition && (
+                      <div className="ml-4 space-y-2">
+                        <h3 className={`font-bold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Second Wave Packet</h3>
+                        <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          z0 (2nd):
+                          <input 
+                            type="number"
+                            value={z0Packet2}
+                            onChange={(e) => setZ0Packet2(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          />
+                        </label>
+                        <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          p0 (2nd):
+                          <input 
+                            type="number"
+                            value={p0Packet2}
+                            onChange={(e) => setP0Packet2(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          />
+                        </label>
+                        <label className={`block ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                          sigma (2nd):
+                          <input 
+                            type="number"
+                            value={sigmaPacket2}
+                            onChange={(e) => setSigmaPacket2(parseFloat(e.target.value))}
+                            className={`ml-2 border p-1 rounded w-20 ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                </div>
             <div className="space-y-2">
               <button 
                 onClick={handleRunSimulation}
