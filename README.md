@@ -2,17 +2,17 @@
 
 Here's how the online app looks like that I made for the thesis (add-on)
 
-![](repo_resources/arrival_time_app.png)
+![](./repo_resources/arrival_time_app.png)
 
 And this is what an arrival time distribution looks like for opaque barrier, for particles in free fall:
 
-![](repo_resources/arrival_time.png)
+![](./repo_resources/arrival_time.png)
 
 When arrival time peaks are analysed, then very interesting graphics like these are produced for different changing variables:
 
-![](repo_resources/different_peaks.png)
+![](./repo_resources/different_peaks.png)
 
-![](repo_resources/barrier_strength.png)
+![](./repo_resources/barrier_strength.png)
 
 The above graphics are discussed in the paper as being **new results** and ready for **experimental verification** and **further theoretical treatment**.
 
