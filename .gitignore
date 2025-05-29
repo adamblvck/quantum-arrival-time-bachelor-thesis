@@ -3,7 +3,7 @@
 # dependencies
 /node_modules
 /.pnp
-*.png
+notebooks/**/*.png
 .pnp.js
 *.zip
 
