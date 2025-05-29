@@ -1,0 +1,75 @@
+\documentclass{uhphyspaper} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       START DOCUMENT       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{lipsum} % For demo purposes, remove 
+\usepackage{listings} % Provides \lstinline{} for demo, remove
+
+% Titles
+\title{Quantum Mechanical Arrival Time Distributions
+In Free Fall Experiments Across Opaque Barriers}
+\keywords{quantum mechanics, Bohmian mechanics, arrival time, tunneling time, quantum free fall, gaussian barriers, larmor clock, split operator method, Yoshida method, spin precession}
+
+% Course information
+\bachyear{$\mathit{3^{rd}}$}
+\course{Bachelor Thesis}
+\date{\today}
+
+% Authors, supervisors, principle investigator (PI, promotor)
+\author[1$^{\dagger}$]{Adam Blazejczak}
+\author[2]{Jef Hooyberghs}
+\author[3]{Siddhant Das}
+\author[4]{Ward Struyve}
+
+% Author affiliations
+\affil[1,2$^{\dagger}$]{UHasselt, Theory Lab, Agoralaan, 3590 Diepenbeek, Belgium}
+\affil[3]{LMU Munich, ASC for Theoretical Physics, Theresienstraße, 80333 München, Germany}
+\affil[4]{KU Leuven, Institute for Theoretical Physics, Celestijnenlaan, 3001 Leuven, Belgium}
+
+% PI contact info, do not remove
+\pitel{+32 485 974 525}
+\pimail{adam@blvckstudios.com}
+
+% Big O Command
+\newcommand{\bigO}{\mathcal{O}}
+\usepackage{bbold}
+\usepackage{subcaption}
+\usepackage{nicefrac}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       START DOCUMENT       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\maketitle\thispagestyle{fancy} % pagestyle ensures header is present
+
+% Each section is placed in a separate file to better organise your text
+% You can find these files in the Sections folder
+\input{Sections/0-ABSTRACT}
+\newline
+\rule[1.5ex]{\linewidth}{0.4pt}
+
+\input{Sections/1-INTRODUCTION}
+\input{Sections/2-THEORY}
+\input{Sections/3-EXPERIMENTAL}
+\input{Sections/4-RESULTS}
+\input{Sections/5-DISCUSSION}
+\input{Sections/6-CONCLUSIONS}
+
+% Additional sections for acknowledgments
+\rule{\linewidth}{0.4pt}
+\input{Sections/7-ACKNOWLEDGEMENTS}
+
+% The bibliography is added at the end of the paper in a single column
+\vspace{0.5cm}
+\printbibliography[title={REFERENCES}]
+
+\newpage
+\input{Sections/01-ABSTRACT-NL}
+
+\newpage
+\input{Sections/8-Appendix}
+
+\newpage
+\input{Sections/9-Appendix-Images}
+
+\end{document}

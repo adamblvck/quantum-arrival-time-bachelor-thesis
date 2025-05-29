@@ -1,0 +1,92 @@
+\section{NUMERICAL PROCEDURES}
+
+All simulations are conducted in the \textbf{Python} programming language, in conjunction with the \textit{numpy} \cite{harris2020array} and \textit{scipy} \cite{2020SciPy-NMeth} numerical calculation packages. The computer used for running these simulations are listed in the table below:
+
+\begin{table}[H]
+\centering
+\caption{Specifications of simulation computer}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Spec} & \textbf{Details} \\
+\hline
+Model & MacBook Pro (14-inch, 2023) \\
+\hline
+Chip & Apple M2 Pro \\
+\hline
+CPU & 10-core (6 at 3.5 Ghz - 2.4 Ghz) \\
+\hline
+Memory & 32 GB \\
+\hline
+Storage & 1 TB SSD \\
+\hline
+\end{tabular}
+\label{tab:mac_specs}
+\end{table}
+
+Simulations have been conducted using the \textbf{Split-Operator Method} which uses Fast Fourier Transforms (FFTs) for efficient time evolution of the TDSE with errors of order $\bigO(dt^3)$, as well as an $\bigO(dt^5)$ error extension, the \textbf{Yoshida Method} \cite{Yoshida1990} for improved accuracy. A time step looks as follows, with $\mathcal{F}$ and $\mathcal{F}^-1$ resp. the discrete Fourier transformation and its reverse:
+\begin{align}
+\psi(t+\Delta t) &=
+e^{-\frac{i}{2\hbar}V\Delta t}\, \\
+& \mathcal{F}^{-1}\!\bigl[e^{ -\frac{i\hbar k^2}{2m}\Delta t }\,
+\mathcal{F}[e^{-\frac{i}{2\hbar}V\Delta t}\psi(t)]\bigr]
+\end{align}
+Both methods are compared. Since numerical simulations of quantum systems are done in a closed box environment, a complex absorption potential (CAP) is placed at 30\% simulation units away from the edge, to ensure efficient absorption of the wave function, with no-to-minimal reflections. Grid searches are done in a reasonable range for dialling the free parameters of the Polynomial CAP. More CAPs mentioned in literature were tested, with the polynomial CAP working well for the purpose of this study. There's more information available in appendix \ref{sec:cap}. Finally, \textbf{spectral derivation} was employed to calculate Bohmian trajectories correctly. The main author found that the Bohmian velocity field were trailing behind the bulk of the $|\psi|^2$, possibly due to CFL conditions not being met \cite{courant1967partial}. Employing spectral derivation resolved this issue.
+\subsection{1D Simulations}
+
+\paragraph{Spatial discretization.}
+The coordinate axis is discretized by a uniform mesh $ z_j = x_{\min}+j\,\Delta z,\; j=0,\dots,N_x-1$ with \(\Delta z=(x_{\max}-x_{\min})/N_x\). Derivatives entering the kinetic phase factor are evaluated in momentum space through the discrete Fourier transform, \(k_j = 2\pi j /(N_x\Delta z)\), but in practice through the Fast Fourier Transform. Kinetic factors are calculated at each step using FFTs for quick iteration times. Picking $N_x=N_y=1028$ with $\Delta t = 0.001s$ across $z \in [-40,40]$ gave a good tradeoff between speed and physicality in produced simulation.
+\paragraph{External potential.}
+The total potential consists of a linear gravitational term, a tunable barrier at the origin, and an optional complex absorbing part,  
+\begin{equation}
+    V(z) \;=\; mgz\;+\;V_{\text{bar}}(z)\;-\;iW(z),
+\end{equation}
+where \(m=\hbar=1\) and $g=9.81$ in the simulation’s natural units.
+
+\paragraph{Barrier.}  
+  Two barrier models are implemented in the simulation:
+  \begin{align}
+      V_\delta(z) &= \alpha\,
+      \frac{\exp\!\bigl[-(z-z_0)^2/2\sigma^2\bigr]}
+           {\sqrt{2\pi}\sigma},
+      &&\sigma=\tfrac12\Delta z,\tag{\textit{``delta''}}\\[4pt]
+      V_g(z)      &= V_0\,
+      \exp\!\bigl[-(z-z_0)^2/2\sigma^2\bigr],\tag{\textit{``gaussian''}}
+  \end{align}
+  where the first line approximates an ideal \(\delta\)-barrier by a narrow Gaussian whose width is tied to the grid spacing.
+
+\subsection{2D Simulations with Spin}
+
+\label{sec:spin-dynamics}
+
+The setup for modelling Gaussian spin-$\frac{1}{2}$ particles falling under free fall throughout a magnetic is modelled by propagating a two–component spinor  
+\(
+\Psi(\mathbf r,t)=
+\bigl(\psi_\uparrow(\mathbf r,t),\,
+       \psi_\downarrow(\mathbf r,t)\bigr)^{\!\mathsf T},
+\quad
+\mathbf r=(x,y),
+\)
+under a Hamiltonian that separates into kinetic and spin–dependent
+potential parts,  
+\begin{align}
+    \hat{H} &=      \underbrace{\vphantom{\bigl|}\Bigl[-\dfrac{\hbar^{2}}{2m}
+      \bigl(\partial_x^{2}+\partial_y^{2}\bigr)\Bigr]}_{\hat{T}\,\otimes\,\mathbbm \mathbb{1}_{2\times2} } \\
+      &+\;
+      \underbrace{\bigl[\,V_0(\mathbf r)\,\mathbb{1}_{2\times2}
+                      +V_B(\mathbf r)\,\sigma_z\bigr]}_{\hat{V}(\mathbf r)}
+\end{align}
+where  
+\(V_0(\mathbf r)=mg\,y\) is the spin–independent gravitational term and  
+\(V_B(\mathbf r)\) is a magnetic barrier that couples to the Pauli
+matrix $\sigma_z$. With the barrier centred at, \((x_0,y_0)\), a Gaussian profile is used for modelling a physically realistic laser profile
+\begin{align}
+V_B^{(\text{G})}=V_0^{\text B}\exp[-(\rho/\sigma)^2/2],\\
+\rho^2=(x-x_0)^2+(y-y_0)^2,
+\end{align}
+or, in the second situation, a hard–edged circular uniform magnetic field $B_0$. Both situations are compared.
+\\\\
+The Split Operator Step in 2D requires more attention, with full details in appendix \ref{sec:spin-dynamics-2d}, although it follows the overall methodology as in 1D experiments. For 2D simulations, the number of memory required to complete a successful iteration grows exponentially. Careful memory management, and a discretization of $Nx=Ny=512$ at a $\Delta t=0.01s$ for a space of $x,y \in \mathbb{R}^2 \quad \text{limited to} \quad [-20, 20]$ works well for producing physically feasible simulations. The explored free parameter space explored in this study is listed in the appendix.
+
+\subsection{General Workflow}
+
+The overall workflows is briefly discussed for most simulations in this study. First, Siddant Das \cite{siddhant:paper} low energy regime model for the arrival time distribution is compared with the setup numerical simulations. After this, the arrival time density for 1-dimensional simulations is analysed for different barrier strengths, different drop heights, and the arrival time peaks are characterized. Practise has shown that 1D simulations, across 400+ simulations with 50k time steps each, can be held in memory easily. The one dimensional arrival time calculations generally translate to two and three dimensions, due to the other dimensions not contributing non-trivially to the probability current at the plane $y=-L$, which can be removed from analysis by separation of variables. Next up, tunnelling time is analysed in the \textbf{Larmor Clock} theory and Bohmian Theory in 2D simulations. For this, two magnetic barrier types are tested at different strengths (circular and Gaussian-profile uniform barriers). The simulation runs for 3 seconds, until the wave function hits the barrier. The simulated setup can be seen in figure \ref{fig:1d_setup} on page \pageref{fig:1d_setup}. For 2D data gathering, each simulation's data needs to be stored separately on file ($\approx$ 6.5 $Gb$ per file), requiring about 450Gb in total storage for all 1D and 2D simulations made in this study. This storage space is readily available in the commercial laptop range. A single 2d simulation run takes $\pm22$ minutes, depending on available computer resources and simulation parameters. The general workflow for gathering quantities across many simulations is depicted in figure \ref{fig:general-workflow} on page \pageref{fig:general-workflow}.
