@@ -40,7 +40,7 @@ Most important notebooks:
 
 All helper code for the required notebooks are found in [the helpers folder](notebooks/helpers/).
 
-The paper is available [here]("Deliverable/Bachelor Presentation - Analysis of Arrival and Tunneling Time In Free Fall Experiments With Opaque Barriers.pptx"), and the corresponding presentation is available [here](<Deliverable/Bachelor_Thesis_Arrival_Time_in_Quantum_Mechanical_Free_Fall_Experiments_Final.pdf>). Its `LaTeX` source code is available [here](/paper/).
+The paper is available [here](<Deliverable/Bachelor Presentation - Analysis of Arrival and Tunneling Time In Free Fall Experiments With Opaque Barriers.pptx>), and the corresponding presentation is available [here](<Deliverable/Bachelor_Thesis_Arrival_Time_in_Quantum_Mechanical_Free_Fall_Experiments_Final.pdf>). Its `LaTeX` source code is available [here](/paper/).
 
 
 ## About The App
